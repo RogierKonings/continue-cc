@@ -1,0 +1,16 @@
+[
+  {
+    "name": "VSCode Extension Bundle",
+    "path": "out/extension.js",
+    "limit": "500 KB",
+    "webpack": false,
+    "brotli": true
+  },
+  {
+    "name": "Total Extension Size",
+    "path": "out/**/*.js",
+    "limit": "1 MB",
+    "webpack": false,
+    "brotli": true
+  }
+]

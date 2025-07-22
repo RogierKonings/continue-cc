@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build extension
+      run: npm run build
+
+    - name: Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Update package.json version
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add package.json package-lock.json
+        git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+        git tag ${{ steps.version.outputs.tag }}
+        git push origin HEAD:main --tags
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        npm run changelog -- --release-as ${{ steps.version.outputs.version }}
+        CHANGELOG=$(cat CHANGELOG.md | sed -n '/^## \['${{ steps.version.outputs.version }}'\]/,/^## \[/p' | sed '$d')
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Package extension
+      run: |
+        npm run package
+        mv *.vsix continue-cc-${{ steps.version.outputs.version }}.vsix
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.tag }}
+        name: Release ${{ steps.version.outputs.version }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: false
+        files: |
+          continue-cc-${{ steps.version.outputs.version }}.vsix
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare for VSCode Marketplace
+      run: |
+        echo "## Next Steps for VSCode Marketplace Publishing"
+        echo "1. Download the VSIX file from the release"
+        echo "2. Go to https://marketplace.visualstudio.com/manage"
+        echo "3. Upload the VSIX file"
+        echo "4. Fill in the required information"
+        echo "5. Publish the extension"
+        echo ""
+        echo "Or use vsce CLI:"
+        echo "vsce publish -p <publisher-token>"
+
+  build-all-platforms:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build extension
+      run: npm run build
+
+    - name: Package extension
+      run: npm run package
+
+    - name: Rename platform-specific VSIX
+      shell: bash
+      run: |
+        VERSION=${{ needs.release.outputs.version }}
+        PLATFORM=${{ runner.os }}
+        mv *.vsix continue-cc-${VERSION}-${PLATFORM}.vsix
+
+    - name: Upload platform-specific VSIX
+      uses: actions/upload-artifact@v4
+      with:
+        name: vsix-${{ matrix.os }}
+        path: continue-cc-*.vsix
+        retention-days: 7

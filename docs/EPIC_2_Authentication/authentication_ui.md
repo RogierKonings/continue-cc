@@ -6,47 +6,47 @@ As a user, I want clear visual feedback about my authentication status and easy 
 ## Action Items
 
 ### 1. Create Login Command and Flow
-- [ ] Register "Claude Code: Sign In" command in package.json
-- [ ] Create login flow coordinator class
-- [ ] Implement progress notification during auth
-- [ ] Show success message with user info after login
-- [ ] Add "Sign In" button to welcome views
+- [x] Register "Claude Code: Sign In" command in package.json
+- [x] Create login flow coordinator class
+- [x] Implement progress notification during auth
+- [x] Show success message with user info after login
+- [x] Add "Sign In" button to welcome views
 
 ### 2. Implement Status Bar Integration
-- [ ] Create status bar item showing auth status
-- [ ] Show username when authenticated
-- [ ] Display warning icon when token expires soon
-- [ ] Add click handler to show auth menu
-- [ ] Implement tooltip with session details
+- [x] Create status bar item showing auth status
+- [x] Show username when authenticated
+- [x] Display warning icon when token expires soon
+- [x] Add click handler to show auth menu
+- [x] Implement tooltip with session details
 
 ### 3. Build Authentication Webview
-- [ ] Create webview for manual token entry
-- [ ] Design responsive authentication UI
-- [ ] Implement form validation for credentials
-- [ ] Add loading states during authentication
-- [ ] Create error display for failed attempts
+- [x] Create webview for manual token entry
+- [x] Design responsive authentication UI
+- [x] Implement form validation for credentials
+- [x] Add loading states during authentication
+- [x] Create error display for failed attempts
 
 ### 4. Handle Authentication Errors
-- [ ] Create error notification system
-- [ ] Implement user-friendly error messages
-- [ ] Add "Try Again" actions to error notifications
-- [ ] Create detailed error logs for debugging
-- [ ] Implement error recovery suggestions
+- [x] Create error notification system
+- [x] Implement user-friendly error messages
+- [x] Add "Try Again" actions to error notifications
+- [x] Create detailed error logs for debugging
+- [x] Implement error recovery suggestions
 
 ### 5. Implement Deep Link Handling
-- [ ] Register VSCode URI handler for OAuth callback
-- [ ] Create deep link parser for auth codes
-- [ ] Handle app focus on deep link activation
-- [ ] Implement security validation for deep links
-- [ ] Add fallback for when deep links fail
+- [x] Register VSCode URI handler for OAuth callback
+- [x] Create deep link parser for auth codes
+- [x] Handle app focus on deep link activation
+- [x] Implement security validation for deep links
+- [x] Add fallback for when deep links fail
 
 ## Acceptance Criteria
-- [ ] Login command appears in command palette
-- [ ] Status bar shows current auth state
-- [ ] Authentication errors show clear messages
-- [ ] Deep links work on all platforms
-- [ ] UI is responsive and accessible
-- [ ] All auth states have visual representation
+- [x] Login command appears in command palette
+- [x] Status bar shows current auth state
+- [x] Authentication errors show clear messages
+- [x] Deep links work on all platforms
+- [x] UI is responsive and accessible
+- [x] All auth states have visual representation
 
 ## Test Cases
 

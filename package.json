@@ -10,7 +10,34 @@
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": []
+    "authentication": [
+      {
+        "id": "claude-code-continue",
+        "label": "Claude Code"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Code Continue",
+      "properties": {
+        "claude-code.clientId": {
+          "type": "string",
+          "default": "",
+          "description": "OAuth Client ID for Claude Code authentication"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "claude-code-continue.signIn",
+        "title": "Claude Code: Sign In",
+        "category": "Claude Code"
+      },
+      {
+        "command": "claude-code-continue.signOut",
+        "title": "Claude Code: Sign Out",
+        "category": "Claude Code"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run build:prod",

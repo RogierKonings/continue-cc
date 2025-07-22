@@ -1,0 +1,11 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": ["src/**/*.spec.ts", "src/test/**"],
+  "exec": "npm run compile",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "legacy-watch": false,
+  "delay": "1000"
+}

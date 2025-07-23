@@ -21,6 +21,29 @@ export function activate(context: vscode.ExtensionContext): void {
   completionRegistry = new CompletionProviderRegistry();
   completionRegistry.register(context);
 
+  // Register partial accept command for inline completions
+  const partialAcceptCommand = vscode.commands.registerCommand(
+    'continue-cc.acceptPartialCompletion',
+    () => {
+      return vscode.commands.executeCommand('editor.action.inlineSuggest.acceptNextWord');
+    }
+  );
+
+  // Register tracking commands for completions
+  const trackCompletionCommand = vscode.commands.registerCommand(
+    'continue-cc.trackCompletion',
+    (text: string) => {
+      console.log('Completion accepted:', text);
+    }
+  );
+
+  const trackInlineCompletionCommand = vscode.commands.registerCommand(
+    'continue-cc.trackInlineCompletion',
+    (text: string) => {
+      console.log('Inline completion accepted:', text);
+    }
+  );
+
   // Register sign in command
   const signInCommand = vscode.commands.registerCommand('claude-code-continue.signIn', async () => {
     await authFlowCoordinator.startLoginFlow();
@@ -117,7 +140,10 @@ export function activate(context: vscode.ExtensionContext): void {
     signOutCommand,
     authMenuCommand,
     uriHandler,
-    authStatusBar
+    authStatusBar,
+    partialAcceptCommand,
+    trackCompletionCommand,
+    trackInlineCompletionCommand
   );
 }
 

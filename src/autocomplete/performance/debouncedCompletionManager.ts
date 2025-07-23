@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { CodeContext } from '../context/contextExtractor';
 import { Logger } from '../../utils/logger';
+import { BracketMatcher } from '../utils/bracketMatcher';
 
 interface PendingRequest {
   abortController: AbortController;
@@ -167,7 +168,58 @@ export class DebouncedCompletionManager {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         if (!signal.aborted) {
-          resolve([
+          const completions = [];
+
+          // Check if we're in a block context
+          if (this.isBlockContext(context)) {
+            completions.push({
+              text: 'if block',
+              detail: 'Complete if statement',
+              kind: vscode.CompletionItemKind.Snippet,
+              isBlockCompletion: true,
+              insertText: 'if (${1:condition}) {\n\t${2:// code}\n}',
+            });
+            completions.push({
+              text: 'for loop',
+              detail: 'Complete for loop',
+              kind: vscode.CompletionItemKind.Snippet,
+              isBlockCompletion: true,
+              insertText:
+                'for (let ${1:i} = 0; ${1:i} < ${2:length}; ${1:i}++) {\n\t${3:// code}\n}',
+            });
+            completions.push({
+              text: 'try-catch',
+              detail: 'Complete try-catch block',
+              kind: vscode.CompletionItemKind.Snippet,
+              isBlockCompletion: true,
+              insertText:
+                'try {\n\t${1:// code}\n} catch (${2:error}) {\n\t${3:// handle error}\n}',
+            });
+          }
+
+          // Check for smart bracket completions
+          const lastChar = context.currentLine.charAt(context.cursorPosition.character - 1);
+          if (BracketMatcher.isOpenBracket(lastChar)) {
+            const bracketCompletion = BracketMatcher.getSmartBracketCompletion(lastChar, {
+              language: context.language,
+              position: context.cursorPosition,
+              document: context.document!,
+              currentLine: context.currentLine,
+            });
+
+            if (bracketCompletion) {
+              completions.unshift({
+                text: lastChar + bracketCompletion,
+                detail: 'Auto-close bracket',
+                kind: vscode.CompletionItemKind.Text,
+                insertText: bracketCompletion,
+                isBlockCompletion: bracketCompletion.includes('\n'),
+              });
+            }
+          }
+
+          // Add regular completions
+          completions.push(
             {
               text: 'console.log',
               detail: 'Log to console',
@@ -177,8 +229,10 @@ export class DebouncedCompletionManager {
               text: 'const',
               detail: 'Declare constant',
               kind: vscode.CompletionItemKind.Keyword,
-            },
-          ]);
+            }
+          );
+
+          resolve(completions);
         }
       }, 150);
 
@@ -220,7 +274,13 @@ export class DebouncedCompletionManager {
       item.detail = completion.detail;
       item.documentation = completion.documentation;
       item.sortText = String(index).padStart(3, '0');
-      item.insertText = completion.insertText || completion.text;
+
+      // Handle nested block completions
+      if (completion.isBlockCompletion) {
+        item.insertText = new vscode.SnippetString(completion.insertText || completion.text);
+      } else {
+        item.insertText = completion.insertText || completion.text;
+      }
 
       // Add command to track completion acceptance
       item.command = {
@@ -293,6 +353,32 @@ export class DebouncedCompletionManager {
 
   private generateRequestId(): string {
     return `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private isBlockContext(context: CodeContext): boolean {
+    // Check if the current line ends with an opening brace or common block starter
+    const trimmedLine = context.currentLine.trim();
+    const blockStarters = ['{', ':', 'then', 'do', 'begin'];
+
+    // Check if line ends with block starter
+    for (const starter of blockStarters) {
+      if (trimmedLine.endsWith(starter)) {
+        return true;
+      }
+    }
+
+    // Check for incomplete block structures
+    const incompletePatterns = [
+      /^if\s*\(/,
+      /^for\s*\(/,
+      /^while\s*\(/,
+      /^function\s+\w*\s*\(/,
+      /^class\s+\w+/,
+      /^try\s*$/,
+      /^catch\s*\(/,
+    ];
+
+    return incompletePatterns.some((pattern) => pattern.test(trimmedLine));
   }
 
   dispose(): void {

@@ -8,8 +8,8 @@ export class ClaudeCompletionProvider
   implements vscode.CompletionItemProvider, vscode.InlineCompletionItemProvider
 {
   private readonly contextExtractor: ContextExtractor;
-  private readonly debouncedManager: DebouncedCompletionManager;
-  private readonly cache: CompletionCache;
+  readonly debouncedManager: DebouncedCompletionManager;
+  readonly cache: CompletionCache;
   private readonly logger: Logger;
 
   constructor() {

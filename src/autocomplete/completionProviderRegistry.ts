@@ -122,13 +122,33 @@ export class CompletionProviderRegistry {
   }
 
   private showMetrics(): void {
-    // TODO: Implement metrics display
-    vscode.window.showInformationMessage('Completion metrics feature coming soon!');
+    const cacheMetrics = this.provider.cache.getMetrics();
+    const debouncerMetrics = this.provider.debouncedManager.getMetrics();
+
+    const message = `Completion Performance Metrics:
+Cache:
+  - Size: ${cacheMetrics.size}
+  - Hit Rate: ${cacheMetrics.hitRate.toFixed(1)}%
+  - Miss Rate: ${cacheMetrics.missRate.toFixed(1)}%
+  - Evictions: ${cacheMetrics.evictionCount}
+  - Memory Usage: ${(cacheMetrics.estimatedMemoryUsage / 1024 / 1024).toFixed(2)} MB
+
+Debouncer:
+  - Pending Requests: ${debouncerMetrics.pendingRequests}
+  - Avg Typing Speed: ${debouncerMetrics.averageTypingSpeed.toFixed(1)} chars/sec
+  - Last Debounce Delay: ${debouncerMetrics.lastDebounceDelay}ms`;
+
+    vscode.window.showInformationMessage(message, { modal: true });
   }
 
   private clearCache(): void {
-    // TODO: Access cache through provider and clear it
-    vscode.window.showInformationMessage('Completion cache cleared!');
+    this.provider.cache.clear();
+    this.provider.cache.resetMetrics();
+    vscode.window.showInformationMessage('Completion cache cleared successfully');
+  }
+
+  getProvider(): ClaudeCompletionProvider {
+    return this.provider;
   }
 
   dispose(): void {

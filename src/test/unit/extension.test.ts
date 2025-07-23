@@ -23,6 +23,7 @@ describe('Extension', () => {
       storageUri: undefined,
       globalStorageUri: vscode.Uri.file(''),
       logUri: vscode.Uri.file(''),
+      languageModelAccessInformation: {} as any,
     };
   });
 

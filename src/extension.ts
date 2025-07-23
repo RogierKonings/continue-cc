@@ -2,10 +2,12 @@ import * as vscode from 'vscode';
 import { AuthFlowCoordinator } from './auth/authFlowCoordinator';
 import { ClaudeAuthService } from './auth/claudeAuthService';
 import { AuthStatusBar } from './views/authStatusBar';
+import { CompletionProviderRegistry } from './autocomplete/completionProviderRegistry';
 
 let authService: ClaudeAuthService;
 let authFlowCoordinator: AuthFlowCoordinator;
 let authStatusBar: AuthStatusBar;
+let completionRegistry: CompletionProviderRegistry;
 
 export function activate(context: vscode.ExtensionContext): void {
   console.log('Claude Code Continue extension is now active!');
@@ -14,6 +16,10 @@ export function activate(context: vscode.ExtensionContext): void {
   authService = new ClaudeAuthService(context);
   authFlowCoordinator = new AuthFlowCoordinator(authService, context);
   authStatusBar = new AuthStatusBar(authService, context);
+
+  // Initialize autocomplete services
+  completionRegistry = new CompletionProviderRegistry();
+  completionRegistry.register(context);
 
   // Register sign in command
   const signInCommand = vscode.commands.registerCommand('claude-code-continue.signIn', async () => {
@@ -117,4 +123,9 @@ export function activate(context: vscode.ExtensionContext): void {
 
 export function deactivate(): void {
   console.log('Claude Code Continue extension is now deactivated');
+
+  // Clean up autocomplete resources
+  if (completionRegistry) {
+    completionRegistry.dispose();
+  }
 }

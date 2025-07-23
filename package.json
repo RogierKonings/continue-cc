@@ -27,6 +27,56 @@
           "type": "string",
           "default": "",
           "description": "OAuth Client ID for Claude Code authentication"
+        },
+        "continue-cc.autocomplete.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI-powered code completions"
+        },
+        "continue-cc.autocomplete.automaticTrigger": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically trigger completions while typing"
+        },
+        "continue-cc.autocomplete.minimumCharacters": {
+          "type": "number",
+          "default": 2,
+          "description": "Minimum number of characters before triggering completions"
+        },
+        "continue-cc.autocomplete.completionDelay": {
+          "type": "number",
+          "default": 200,
+          "description": "Delay in milliseconds before requesting completions"
+        },
+        "continue-cc.autocomplete.disableInComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable completions inside comments"
+        },
+        "continue-cc.autocomplete.disableInStrings": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable completions inside strings"
+        },
+        "continue-cc.autocomplete.maxCompletions": {
+          "type": "number",
+          "default": 20,
+          "description": "Maximum number of completions to show"
+        },
+        "continue-cc.autocomplete.enableInlineCompletions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable multi-line inline completions"
+        },
+        "continue-cc.autocomplete.enableCaching": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable caching of completion results"
+        },
+        "continue-cc.autocomplete.cacheTTL": {
+          "type": "number",
+          "default": 300000,
+          "description": "Cache time-to-live in milliseconds (default: 5 minutes)"
         }
       }
     },
@@ -39,6 +89,16 @@
       {
         "command": "claude-code-continue.signOut",
         "title": "Claude Code: Sign Out",
+        "category": "Claude Code"
+      },
+      {
+        "command": "continue-cc.showCompletionMetrics",
+        "title": "Show Completion Metrics",
+        "category": "Claude Code"
+      },
+      {
+        "command": "continue-cc.clearCompletionCache",
+        "title": "Clear Completion Cache",
         "category": "Claude Code"
       }
     ]

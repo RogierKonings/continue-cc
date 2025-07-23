@@ -2,12 +2,17 @@ import * as vscode from 'vscode';
 
 export class Logger {
   private static instance: Logger;
-  private outputChannel: vscode.OutputChannel;
+  private static outputChannel: vscode.OutputChannel;
   private debugMode: boolean;
+  private componentName: string;
 
-  private constructor() {
-    this.outputChannel = vscode.window.createOutputChannel('Claude Code Continue');
+  constructor(componentName?: string) {
+    this.componentName = componentName || 'General';
     this.debugMode = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+
+    if (!Logger.outputChannel) {
+      Logger.outputChannel = vscode.window.createOutputChannel('Claude Code Continue');
+    }
   }
 
   static getInstance(): Logger {
@@ -19,7 +24,7 @@ export class Logger {
 
   private formatMessage(level: string, message: string, data?: any): string {
     const timestamp = new Date().toISOString();
-    let formattedMessage = `[${timestamp}] [${level}] ${message}`;
+    let formattedMessage = `[${timestamp}] [${level}] [${this.componentName}] ${message}`;
 
     if (data !== undefined) {
       formattedMessage += `\n${JSON.stringify(data, null, 2)}`;
@@ -31,20 +36,20 @@ export class Logger {
   debug(message: string, data?: any): void {
     if (this.debugMode) {
       const formatted = this.formatMessage('DEBUG', message, data);
-      this.outputChannel.appendLine(formatted);
+      Logger.outputChannel.appendLine(formatted);
       console.log(formatted);
     }
   }
 
   info(message: string, data?: any): void {
     const formatted = this.formatMessage('INFO', message, data);
-    this.outputChannel.appendLine(formatted);
+    Logger.outputChannel.appendLine(formatted);
     console.log(formatted);
   }
 
   warn(message: string, data?: any): void {
     const formatted = this.formatMessage('WARN', message, data);
-    this.outputChannel.appendLine(formatted);
+    Logger.outputChannel.appendLine(formatted);
     console.warn(formatted);
   }
 
@@ -59,20 +64,20 @@ export class Logger {
         : error;
 
     const formatted = this.formatMessage('ERROR', message, errorData);
-    this.outputChannel.appendLine(formatted);
+    Logger.outputChannel.appendLine(formatted);
     console.error(formatted);
   }
 
   show(): void {
-    this.outputChannel.show();
+    Logger.outputChannel.show();
   }
 
   clear(): void {
-    this.outputChannel.clear();
+    Logger.outputChannel.clear();
   }
 
   dispose(): void {
-    this.outputChannel.dispose();
+    // Output channel is shared, so we don't dispose it per instance
   }
 }
 

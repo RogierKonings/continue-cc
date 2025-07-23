@@ -9,7 +9,7 @@ async function main(): Promise<void> {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      launchArgs: ['--disable-extensions']
+      launchArgs: ['--disable-extensions'],
     });
   } catch (err) {
     console.error('Failed to run tests:', err);

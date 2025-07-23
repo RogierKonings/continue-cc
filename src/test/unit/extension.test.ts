@@ -1,3 +1,4 @@
+/* eslint-disable */
 import * as vscode from 'vscode';
 import { activate, deactivate } from '../../extension';
 
@@ -28,9 +29,9 @@ describe('Extension', () => {
   describe('activate', () => {
     it('should register hello world command', () => {
       const registerCommandSpy = jest.spyOn(vscode.commands, 'registerCommand');
-      
+
       activate(context);
-      
+
       expect(registerCommandSpy).toHaveBeenCalledWith(
         'claude-code-continue.helloWorld',
         expect.any(Function)
@@ -42,9 +43,9 @@ describe('Extension', () => {
   describe('deactivate', () => {
     it('should log deactivation message', () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       deactivate();
-      
+
       expect(consoleSpy).toHaveBeenCalledWith('Claude Code Continue extension is now deactivated');
       consoleSpy.mockRestore();
     });

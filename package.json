@@ -6,8 +6,12 @@
   "engines": {
     "vscode": "^1.95.0"
   },
-  "categories": ["Other"],
-  "activationEvents": ["onStartupFinished"],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "authentication": [
@@ -57,29 +61,30 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@types/vscode": "^1.95.0",
+    "@eslint/js": "^9.31.0",
+    "@types/glob": "^8.1.0",
+    "@types/jest": "^29.5.0",
+    "@types/mocha": "^10.0.0",
     "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^9.0.0",
-    "typescript": "^5.4.0",
     "@vscode/test-electron": "^2.3.9",
     "esbuild": "^0.24.0",
+    "eslint": "^9.0.0",
+    "glob": "^10.3.0",
+    "html-webpack-plugin": "^5.6.0",
+    "husky": "^9.0.0",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.0.0",
+    "mocha": "^10.4.0",
     "nodemon": "^3.1.0",
+    "prettier": "^3.3.0",
+    "ts-jest": "^29.2.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.4.0",
     "webpack": "^5.95.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.0",
-    "html-webpack-plugin": "^5.6.0",
-    "ts-loader": "^9.5.1",
-    "prettier": "^3.3.0",
-    "husky": "^9.0.0",
-    "lint-staged": "^15.0.0",
-    "jest": "^29.7.0",
-    "@types/jest": "^29.5.0",
-    "ts-jest": "^29.2.0",
-    "mocha": "^10.4.0",
-    "@types/mocha": "^10.0.0",
-    "glob": "^10.3.0",
-    "@types/glob": "^8.1.0"
+    "webpack-dev-server": "^5.0.0"
   }
 }

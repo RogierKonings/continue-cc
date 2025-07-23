@@ -10,7 +10,7 @@ export class AuthWebviewProvider {
       vscode.ViewColumn.One,
       {
         enableScripts: true,
-        retainContextWhenHidden: true
+        retainContextWhenHidden: true,
       }
     );
 
@@ -18,7 +18,7 @@ export class AuthWebviewProvider {
 
     return new Promise((resolve) => {
       panel.webview.onDidReceiveMessage(
-        message => {
+        (message) => {
           switch (message.command) {
             case 'submitToken':
               panel.dispose();
@@ -41,11 +41,11 @@ export class AuthWebviewProvider {
   }
 
   private getWebviewContent(webview: vscode.Webview): string {
-    const styleUri = webview.asWebviewUri(
+    const _styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, 'media', 'auth.css')
     );
 
-    const scriptUri = webview.asWebviewUri(
+    const _scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, 'media', 'auth.js')
     );
 

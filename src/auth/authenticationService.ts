@@ -33,7 +33,10 @@ export abstract class AuthenticationService {
     if (result.refreshToken) {
       await this.context.secrets.store('claude-code.refreshToken', result.refreshToken);
     }
-    await this.context.globalState.update('claude-code.tokenExpiry', result.expiresAt.toISOString());
+    await this.context.globalState.update(
+      'claude-code.tokenExpiry',
+      result.expiresAt.toISOString()
+    );
     await this.context.globalState.update('claude-code.userInfo', result.userInfo);
   }
 
@@ -47,7 +50,7 @@ export abstract class AuthenticationService {
   protected async getStoredToken(): Promise<string | undefined> {
     const token = await this.context.secrets.get('claude-code.accessToken');
     const expiry = this.context.globalState.get<string>('claude-code.tokenExpiry');
-    
+
     if (!token || !expiry) {
       return undefined;
     }

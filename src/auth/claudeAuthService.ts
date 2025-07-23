@@ -1,14 +1,37 @@
 import * as vscode from 'vscode';
-import { AuthenticationService, AuthenticationResult, UserInfo } from './authenticationService';
+import type { AuthenticationResult, UserInfo } from './authenticationService';
+import { AuthenticationService } from './authenticationService';
 import { AuthenticationError } from './authenticationError';
 import { AuthWebviewProvider } from '../webviews/authWebviewProvider';
+import type { OAuthConfig } from './oauthService';
+import { OAuthService } from './oauthService';
+import { TokenManager } from './tokenManager';
 
 export class ClaudeAuthService extends AuthenticationService {
   private authWebviewProvider: AuthWebviewProvider;
+  private oauthService: OAuthService;
+  private authTimeout: NodeJS.Timeout | null = null;
+  private tokenManager: TokenManager;
 
   constructor(context: vscode.ExtensionContext) {
     super(context);
     this.authWebviewProvider = new AuthWebviewProvider(context);
+
+    const config = vscode.workspace.getConfiguration('claude-code');
+    const oauthConfig: OAuthConfig = {
+      clientId: config.get<string>('clientId') || 'claude-code-vscode',
+      authorizationUrl: 'https://auth.anthropic.com/oauth/authorize',
+      tokenUrl: 'https://auth.anthropic.com/oauth/token',
+      redirectUri: 'http://127.0.0.1:54321/callback',
+      scopes: ['read', 'write', 'profile'],
+    };
+
+    this.oauthService = new OAuthService(oauthConfig);
+
+    this.tokenManager = new TokenManager(context, () => this.refreshToken());
+
+    // Start auto-refresh when extension activates
+    this.tokenManager.startAutoRefresh();
   }
 
   async authenticate(): Promise<AuthenticationResult> {
@@ -16,7 +39,7 @@ export class ClaudeAuthService extends AuthenticationService {
       ['Browser Authentication', 'Manual Token Entry'],
       {
         placeHolder: 'Choose authentication method',
-        title: 'Claude Code Authentication'
+        title: 'Claude Code Authentication',
       }
     );
 
@@ -32,118 +55,164 @@ export class ClaudeAuthService extends AuthenticationService {
   }
 
   private async authenticateViaBrowser(): Promise<AuthenticationResult> {
-    const authUrl = 'https://auth.anthropic.com/oauth/authorize';
-    const clientId = vscode.workspace.getConfiguration('claude-code').get<string>('clientId') || 'default-client-id';
-    const redirectUri = `vscode://claude-code-continue/auth-callback`;
-    
-    const state = this.generateState();
-    await this.context.globalState.update('claude-code.authState', state);
-    
-    const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      response_type: 'code',
-      state: state,
-      scope: 'read write'
-    });
+    try {
+      // Generate PKCE challenge
+      const pkceChallenge = this.oauthService.generatePKCEChallenge();
 
-    const fullAuthUrl = `${authUrl}?${params.toString()}`;
-    
-    await vscode.env.openExternal(vscode.Uri.parse(fullAuthUrl));
-    
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new AuthenticationError('Authentication timeout'));
-      }, 300000); // 5 minutes
+      // Store PKCE verifier for later use
+      await this.context.globalState.update('claude-code.pkceVerifier', pkceChallenge.codeVerifier);
 
-      const disposable = vscode.window.registerUriHandler({
-        handleUri: async (uri: vscode.Uri) => {
-          if (uri.path === '/auth-callback') {
-            clearTimeout(timeout);
-            disposable.dispose();
-            
-            try {
-              const result = await this.handleAuthCallback(uri);
-              resolve(result);
-            } catch (error) {
-              reject(error);
+      // Build authorization URL with PKCE
+      const authUrl = this.oauthService.buildAuthorizationUrl(pkceChallenge);
+
+      // Start callback server
+      const callbackPromise = this.oauthService.startCallbackServer();
+
+      // Open browser
+      await vscode.env.openExternal(vscode.Uri.parse(authUrl));
+
+      // Show progress notification
+      const progressPromise = vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: 'Claude Code Authentication',
+          cancellable: true,
+        },
+        async (progress, token) => {
+          progress.report({ message: 'Waiting for authentication in browser...' });
+
+          // Set up timeout
+          this.authTimeout = setTimeout(() => {
+            this.oauthService.stopCallbackServer();
+            throw new AuthenticationError('Authentication timeout');
+          }, 300000); // 5 minutes
+
+          token.onCancellationRequested(() => {
+            this.oauthService.stopCallbackServer();
+            if (this.authTimeout) {
+              clearTimeout(this.authTimeout);
             }
-          }
+          });
+
+          return callbackPromise;
         }
-      });
-    });
+      );
+
+      // Wait for callback
+      const { code, state } = await progressPromise;
+
+      // Clear timeout
+      if (this.authTimeout) {
+        clearTimeout(this.authTimeout);
+        this.authTimeout = null;
+      }
+
+      // Validate state
+      if (!this.oauthService.validateState(state)) {
+        throw new AuthenticationError('Invalid state parameter - possible security issue');
+      }
+
+      // Exchange code for token
+      const tokenResponse = await this.oauthService.exchangeCodeForToken(
+        code,
+        pkceChallenge.codeVerifier
+      );
+
+      // Get user info
+      const userInfo = await this.getUserInfoFromToken(tokenResponse.access_token);
+
+      // Create result
+      const result: AuthenticationResult = {
+        accessToken: tokenResponse.access_token,
+        refreshToken: tokenResponse.refresh_token,
+        expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000),
+        userInfo,
+      };
+
+      // Store tokens
+      await this.storeTokens(result);
+
+      // Clean up
+      await this.context.globalState.update('claude-code.pkceVerifier', undefined);
+
+      return result;
+    } catch (error) {
+      // Clean up on error
+      this.oauthService.stopCallbackServer();
+      if (this.authTimeout) {
+        clearTimeout(this.authTimeout);
+        this.authTimeout = null;
+      }
+
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      throw new AuthenticationError(`Authentication failed: ${error}`);
+    }
   }
 
   private async authenticateViaManualEntry(): Promise<AuthenticationResult> {
     const token = await this.authWebviewProvider.showTokenEntryWebview();
-    
+
     if (!token) {
       throw new AuthenticationError('No token provided');
     }
 
     const userInfo = await this.validateTokenAndGetUserInfo(token);
-    
+
     const result: AuthenticationResult = {
       accessToken: token,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      userInfo
+      userInfo,
     };
 
     await this.storeTokens(result);
     return result;
   }
 
-  private async handleAuthCallback(uri: vscode.Uri): Promise<AuthenticationResult> {
-    const query = new URLSearchParams(uri.query);
-    const code = query.get('code');
-    const state = query.get('state');
-    const error = query.get('error');
+  private async getUserInfoFromToken(accessToken: string): Promise<UserInfo> {
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+      });
 
-    if (error) {
-      throw new AuthenticationError(`Authentication failed: ${error}`);
+      if (!response.ok) {
+        throw new AuthenticationError(`Failed to get user info: ${response.status}`);
+      }
+
+      const data = (await response.json()) as Record<string, unknown>;
+      return {
+        id: data.id || '',
+        email: data.email || undefined,
+        username: data.username || undefined,
+        displayName: data.display_name || data.name || undefined,
+      };
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      throw new AuthenticationError(`Failed to get user info: ${error}`);
     }
-
-    const savedState = this.context.globalState.get<string>('claude-code.authState');
-    if (state !== savedState) {
-      throw new AuthenticationError('Invalid state parameter - possible security issue');
-    }
-
-    if (!code) {
-      throw new AuthenticationError('No authorization code received');
-    }
-
-    return this.exchangeCodeForToken(code);
-  }
-
-  private async exchangeCodeForToken(code: string): Promise<AuthenticationResult> {
-    // This would make an API call to exchange the code for tokens
-    // For now, returning a mock result
-    const mockToken = 'mock-access-token';
-    const userInfo = await this.validateTokenAndGetUserInfo(mockToken);
-    
-    const result: AuthenticationResult = {
-      accessToken: mockToken,
-      refreshToken: 'mock-refresh-token',
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-      userInfo
-    };
-
-    await this.storeTokens(result);
-    return result;
   }
 
   private async validateTokenAndGetUserInfo(token: string): Promise<UserInfo> {
-    // This would validate the token with the API
-    // For now, returning mock user info
-    return {
-      id: 'user-123',
-      email: 'user@example.com',
-      username: 'claude-user',
-      displayName: 'Claude User'
-    };
+    return this.getUserInfoFromToken(token);
   }
 
   async logout(): Promise<void> {
+    // Stop auto-refresh
+    this.tokenManager.stopAutoRefresh();
+
+    // Revoke token if available
+    const token = await this.getAccessToken();
+    if (token) {
+      await this.tokenManager.revokeToken(token);
+    }
+
+    // Clear stored tokens
     await this.clearTokens();
   }
 
@@ -156,8 +225,15 @@ export class ClaudeAuthService extends AuthenticationService {
   }
 
   async isAuthenticated(): Promise<boolean> {
-    const token = await this.getStoredToken();
-    return !!token;
+    const validation = await this.tokenManager.validateStoredToken();
+
+    if (validation.needsRefresh) {
+      // Try to refresh the token
+      const refreshed = await this.refreshToken();
+      return !!refreshed;
+    }
+
+    return validation.isValid;
   }
 
   async getAccessToken(): Promise<string | undefined> {
@@ -170,14 +246,23 @@ export class ClaudeAuthService extends AuthenticationService {
       return undefined;
     }
 
-    // This would make an API call to refresh the token
-    // For now, returning undefined
-    return undefined;
-  }
+    try {
+      const tokenResponse = await this.oauthService.refreshAccessToken(refreshToken);
+      const userInfo = await this.getUserInfoFromToken(tokenResponse.access_token);
 
-  private generateState(): string {
-    const array = new Uint8Array(32);
-    crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      const result: AuthenticationResult = {
+        accessToken: tokenResponse.access_token,
+        refreshToken: tokenResponse.refresh_token || refreshToken,
+        expiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000),
+        userInfo,
+      };
+
+      await this.storeTokens(result);
+      return result;
+    } catch {
+      // If refresh fails, clear tokens and return undefined
+      await this.clearTokens();
+      return undefined;
+    }
   }
 }

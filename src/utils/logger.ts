@@ -20,11 +20,11 @@ export class Logger {
   private formatMessage(level: string, message: string, data?: any): string {
     const timestamp = new Date().toISOString();
     let formattedMessage = `[${timestamp}] [${level}] ${message}`;
-    
+
     if (data !== undefined) {
       formattedMessage += `\n${JSON.stringify(data, null, 2)}`;
     }
-    
+
     return formattedMessage;
   }
 
@@ -49,12 +49,15 @@ export class Logger {
   }
 
   error(message: string, error?: Error | any): void {
-    const errorData = error instanceof Error ? {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    } : error;
-    
+    const errorData =
+      error instanceof Error
+        ? {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+          }
+        : error;
+
     const formatted = this.formatMessage('ERROR', message, errorData);
     this.outputChannel.appendLine(formatted);
     console.error(formatted);

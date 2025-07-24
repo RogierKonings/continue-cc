@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import { ContextExtractor } from '../context/contextExtractor';
 import { DebouncedCompletionManager } from '../performance/debouncedCompletionManager';
 import { CompletionCache } from '../cache/completionCache';

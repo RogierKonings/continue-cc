@@ -1,4 +1,4 @@
-import { CodeContext } from '../context/contextExtractor';
+import type { CodeContext } from '../context/contextExtractor';
 import * as vscode from 'vscode';
 
 interface ContextDiff {

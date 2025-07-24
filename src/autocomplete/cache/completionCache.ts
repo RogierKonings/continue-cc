@@ -1,5 +1,5 @@
-import { CodeContext } from '../context/contextExtractor';
-import * as vscode from 'vscode';
+import type { CodeContext } from '../context/contextExtractor';
+import type * as vscode from 'vscode';
 import { Logger } from '../../utils/logger';
 
 interface CacheEntry {

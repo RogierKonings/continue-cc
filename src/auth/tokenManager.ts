@@ -125,4 +125,28 @@ export class TokenManager {
       console.error('Error revoking token:', error);
     }
   }
+
+  async getValidToken(): Promise<string | undefined> {
+    const validation = await this.validateStoredToken();
+
+    if (!validation.isValid && validation.needsRefresh) {
+      // Try to refresh
+      await this.performTokenRefresh();
+      // Re-validate after refresh
+      const newValidation = await this.validateStoredToken();
+      if (!newValidation.isValid) {
+        return undefined;
+      }
+    } else if (!validation.isValid) {
+      return undefined;
+    }
+
+    return await this.context.secrets.get('claude-code.accessToken');
+  }
+
+  async clearToken(): Promise<void> {
+    await this.context.secrets.delete('claude-code.accessToken');
+    await this.context.globalState.update('claude-code.tokenExpiry', undefined);
+    this.stopAutoRefresh();
+  }
 }

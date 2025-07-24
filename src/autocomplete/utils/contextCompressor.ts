@@ -1,4 +1,4 @@
-import { CodeContext, SymbolInfo } from '../context/contextExtractor';
+import type { CodeContext, SymbolInfo } from '../context/contextExtractor';
 import * as vscode from 'vscode';
 
 interface CompressionOptions {

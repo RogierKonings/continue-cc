@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AuthenticationService } from './authenticationService';
+import type { AuthenticationService } from './authenticationService';
 import { AuthenticationError } from './authenticationError';
 
 export class AuthFlowCoordinator {

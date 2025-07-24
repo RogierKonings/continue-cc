@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CodeContext } from '../context/contextExtractor';
+import type { CodeContext } from '../context/contextExtractor';
 import { Logger } from '../../utils/logger';
 import { BracketMatcher } from '../utils/bracketMatcher';
 

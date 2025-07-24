@@ -1,4 +1,4 @@
-import { CodeContext } from '../context/contextExtractor';
+import type { CodeContext } from '../context/contextExtractor';
 
 export class TokenCounter {
   // Approximate token counting - roughly 4 characters per token

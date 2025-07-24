@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { AuthenticationService } from '../auth/authenticationService';
+import type { AuthenticationService } from '../auth/authenticationService';
 
 export class AuthStatusBar {
   private statusBarItem: vscode.StatusBarItem;
@@ -61,16 +61,16 @@ export class AuthStatusBar {
           'statusBarItem.warningBackground'
         );
         this.statusBarItem.tooltip = new vscode.MarkdownString(
-          `**Claude Code - Session Expiring Soon**\n\n` +
+          '**Claude Code - Session Expiring Soon**\n\n' +
             `User: ${displayName}\n\n` +
-            `⚠️ Your session will expire soon. Click to refresh.`
+            '⚠️ Your session will expire soon. Click to refresh.'
         );
       } else {
         this.statusBarItem.backgroundColor = undefined;
         this.statusBarItem.tooltip = new vscode.MarkdownString(
-          `**Claude Code - Authenticated**\n\n` +
+          '**Claude Code - Authenticated**\n\n' +
             `User: ${displayName}\n\n` +
-            `Click to manage your session`
+            'Click to manage your session'
         );
       }
     } catch {
@@ -82,7 +82,7 @@ export class AuthStatusBar {
     this.statusBarItem.text = '$(sign-in) Sign In to Claude Code';
     this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
     this.statusBarItem.tooltip = new vscode.MarkdownString(
-      `**Claude Code - Not Authenticated**\n\n` + `Click to sign in and start using Claude Code`
+      '**Claude Code - Not Authenticated**\n\n' + 'Click to sign in and start using Claude Code'
     );
   }
 
@@ -90,9 +90,9 @@ export class AuthStatusBar {
     this.statusBarItem.text = '$(error) Claude Code Error';
     this.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
     this.statusBarItem.tooltip = new vscode.MarkdownString(
-      `**Claude Code - Error**\n\n` +
-        `There was an error checking your authentication status.\n` +
-        `Click to try again.`
+      '**Claude Code - Error**\n\n' +
+        'There was an error checking your authentication status.\n' +
+        'Click to try again.'
     );
   }
 

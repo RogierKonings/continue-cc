@@ -10,11 +10,13 @@ export class AuthStatusBar {
     private readonly context: vscode.ExtensionContext
   ) {
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-
-    this.statusBarItem.command = 'claude-code-continue.showAuthMenu';
     this.context.subscriptions.push(this.statusBarItem);
 
     this.initialize();
+  }
+
+  public setCommand(command: string): void {
+    this.statusBarItem.command = command;
   }
 
   private async initialize(): Promise<void> {

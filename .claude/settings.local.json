@@ -18,7 +18,14 @@
       "mcp__serena__activate_project",
       "mcp__filesystem__directory_tree",
       "Bash(npx tsc:*)",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "Bash(grep:*)",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm run:*)",
+      "Bash(claude --version)",
+      "Bash(claude --print \"test\" --output-format json)",
+      "Bash(claude --print \"test authentication\" --output-format json)"
     ],
     "deny": []
   }

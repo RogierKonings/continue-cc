@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { ClaudeCompletionProvider } from './providers/claudeCompletionProvider';
+import { ClaudeCliCompletionProvider } from './providers/claudeCliCompletionProvider';
+import type { ClaudeCliAuthService } from '../auth/claudeCliAuthService';
 import { Logger } from '../utils/logger';
 
 export class CompletionProviderRegistry {
   private readonly logger: Logger;
-  private readonly provider: ClaudeCompletionProvider;
+  private provider: ClaudeCliCompletionProvider | null = null;
   private readonly disposables: vscode.Disposable[] = [];
 
   // Supported languages
@@ -45,10 +46,15 @@ export class CompletionProviderRegistry {
 
   constructor() {
     this.logger = new Logger('CompletionProviderRegistry');
-    this.provider = new ClaudeCompletionProvider();
   }
 
-  register(context: vscode.ExtensionContext): void {
+  register(context: vscode.ExtensionContext, authService?: ClaudeCliAuthService): void {
+    if (!authService) {
+      this.logger.error('Auth service is required for CLI completion provider');
+      return;
+    }
+
+    this.provider = new ClaudeCliCompletionProvider(authService, context);
     this.logger.info('Registering completion providers...');
 
     // Register standard completion provider for each language
@@ -122,37 +128,37 @@ export class CompletionProviderRegistry {
   }
 
   private showMetrics(): void {
-    const cacheMetrics = this.provider.cache.getMetrics();
-    const debouncerMetrics = this.provider.debouncedManager.getMetrics();
+    if (!this.provider) {
+      vscode.window.showInformationMessage('No completion provider active');
+      return;
+    }
 
-    const message = `Completion Performance Metrics:
-Cache:
-  - Size: ${cacheMetrics.size}
-  - Hit Rate: ${cacheMetrics.hitRate.toFixed(1)}%
-  - Miss Rate: ${cacheMetrics.missRate.toFixed(1)}%
-  - Evictions: ${cacheMetrics.evictionCount}
-  - Memory Usage: ${(cacheMetrics.estimatedMemoryUsage / 1024 / 1024).toFixed(2)} MB
-
-Debouncer:
-  - Pending Requests: ${debouncerMetrics.pendingRequests}
-  - Avg Typing Speed: ${debouncerMetrics.averageTypingSpeed.toFixed(1)} chars/sec
-  - Last Debounce Delay: ${debouncerMetrics.lastDebounceDelay}ms`;
-
-    vscode.window.showInformationMessage(message, { modal: true });
+    // CLI provider doesn't have detailed metrics like cache/debouncer
+    vscode.window.showInformationMessage(
+      'Claude CLI Completion Provider is active.\n\nDetailed metrics are not available for CLI-based completions.',
+      { modal: true }
+    );
   }
 
   private clearCache(): void {
-    this.provider.cache.clear();
-    this.provider.cache.resetMetrics();
-    vscode.window.showInformationMessage('Completion cache cleared successfully');
+    if (!this.provider) {
+      vscode.window.showInformationMessage('No completion provider active');
+      return;
+    }
+
+    // CLI provider doesn't have a cache to clear
+    vscode.window.showInformationMessage('CLI-based completions do not use a cache');
   }
 
-  getProvider(): ClaudeCompletionProvider {
+  getProvider(): ClaudeCliCompletionProvider | null {
     return this.provider;
   }
 
   dispose(): void {
-    this.provider.dispose();
+    if (this.provider) {
+      // CLI provider doesn't have dispose method, just null it out
+      this.provider = null;
+    }
     this.disposables.forEach((d) => d.dispose());
   }
 }

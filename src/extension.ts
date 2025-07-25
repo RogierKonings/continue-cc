@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AuthFlowCoordinator } from './auth/authFlowCoordinator';
-import { ClaudeAuthService } from './auth/claudeAuthService';
+import { ClaudeCliAuthService } from './auth/claudeCliAuthService';
 import { AuthStatusBar } from './views/authStatusBar';
 import { CompletionProviderRegistry } from './autocomplete/completionProviderRegistry';
 import { CompletionCommands } from './commands/completionCommands';
@@ -12,7 +12,7 @@ import { StatusBarService } from './services/statusBarService';
 import { LoadingIndicatorService } from './services/loadingIndicatorService';
 import { NotificationService } from './services/notificationService';
 
-let authService: ClaudeAuthService;
+let authService: ClaudeCliAuthService;
 let authFlowCoordinator: AuthFlowCoordinator;
 let authStatusBar: AuthStatusBar;
 let statusBarService: StatusBarService;
@@ -45,73 +45,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await migrationService.validateSettings();
 
   // Initialize authentication services
-  authService = new ClaudeAuthService(context);
+  authService = new ClaudeCliAuthService(context);
   authFlowCoordinator = new AuthFlowCoordinator(authService, context);
-  authStatusBar = new AuthStatusBar(authService, context);
 
-  // Initialize enhanced status bar service
-  statusBarService = new StatusBarService(authService, context);
-
-  // Initialize loading indicator service
-  loadingIndicatorService = new LoadingIndicatorService(context, statusBarService);
-
-  // Initialize notification service
-  notificationService = new NotificationService(context);
-
-  // Initialize autocomplete services
-  completionRegistry = new CompletionProviderRegistry();
-  completionRegistry.register(context);
-
-  // Initialize command handlers
-  completionCommands = new CompletionCommands(context, completionRegistry);
-  settingsCommands = new SettingsCommands(context);
-  generalCommands = new GeneralCommands(context);
-
-  // Register quick actions and code action providers
-  registerQuickActions(context);
-
-  // Register partial accept command for inline completions
-  const partialAcceptCommand = vscode.commands.registerCommand(
-    'continue-cc.acceptPartialCompletion',
-    () => {
-      return vscode.commands.executeCommand('editor.action.inlineSuggest.acceptNextWord');
-    }
-  );
-
-  // Register tracking commands for completions
-  const trackCompletionCommand = vscode.commands.registerCommand(
-    'continue-cc.trackCompletion',
-    (text: string) => {
-      console.log('Completion accepted:', text);
-    }
-  );
-
-  const trackInlineCompletionCommand = vscode.commands.registerCommand(
-    'continue-cc.trackInlineCompletion',
-    (text: string) => {
-      console.log('Inline completion accepted:', text);
-    }
-  );
-
-  // Register completion mode switching command
-  const switchCompletionModeCommand = vscode.commands.registerCommand(
-    'continue-cc.switchCompletionMode',
-    async () => {
-      const provider = completionRegistry.getProvider();
-      if (provider && 'getModeManager' in provider) {
-        const modeManager = (provider as any).getModeManager();
-        await modeManager.showModeQuickPick();
-      }
-    }
-  );
-
-  // Register sign in command
+  // Register auth commands BEFORE creating status bar that uses them
   const signInCommand = vscode.commands.registerCommand('claude-code-continue.signIn', async () => {
     await authFlowCoordinator.startLoginFlow();
     await authStatusBar.updateStatus();
   });
 
-  // Register sign out command
   const signOutCommand = vscode.commands.registerCommand(
     'claude-code-continue.signOut',
     async () => {
@@ -120,7 +62,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   );
 
-  // Register auth menu command
   const authMenuCommand = vscode.commands.registerCommand(
     'claude-code-continue.showAuthMenu',
     async () => {
@@ -164,6 +105,67 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       } else {
         await authFlowCoordinator.startLoginFlow();
         await authStatusBar.updateStatus();
+      }
+    }
+  );
+
+  authStatusBar = new AuthStatusBar(authService, context);
+
+  // Set command after both the status bar and command are created
+  authStatusBar.setCommand('claude-code-continue.showAuthMenu');
+
+  // Initialize enhanced status bar service
+  statusBarService = new StatusBarService(authService, context);
+
+  // Initialize loading indicator service
+  loadingIndicatorService = new LoadingIndicatorService(context, statusBarService);
+
+  // Initialize notification service
+  notificationService = new NotificationService(context);
+
+  // Initialize autocomplete services
+  completionRegistry = new CompletionProviderRegistry();
+  completionRegistry.register(context, authService);
+
+  // Initialize command handlers
+  completionCommands = new CompletionCommands(context, completionRegistry);
+  settingsCommands = new SettingsCommands(context);
+  generalCommands = new GeneralCommands(context);
+
+  // Register quick actions and code action providers
+  registerQuickActions(context);
+
+  // Register partial accept command for inline completions
+  const partialAcceptCommand = vscode.commands.registerCommand(
+    'continue-cc.acceptPartialCompletion',
+    () => {
+      return vscode.commands.executeCommand('editor.action.inlineSuggest.acceptNextWord');
+    }
+  );
+
+  // Register tracking commands for completions
+  const trackCompletionCommand = vscode.commands.registerCommand(
+    'continue-cc.trackCompletion',
+    (text: string) => {
+      console.log('Completion accepted:', text);
+    }
+  );
+
+  const trackInlineCompletionCommand = vscode.commands.registerCommand(
+    'continue-cc.trackInlineCompletion',
+    (text: string) => {
+      console.log('Inline completion accepted:', text);
+    }
+  );
+
+  // Register completion mode switching command
+  const switchCompletionModeCommand = vscode.commands.registerCommand(
+    'continue-cc.switchCompletionMode',
+    async () => {
+      const provider = completionRegistry.getProvider();
+      if (provider && 'getModeManager' in provider) {
+        const modeManager = (provider as any).getModeManager();
+        await modeManager.showModeQuickPick();
       }
     }
   );

@@ -20,7 +20,6 @@ export interface UsageStats {
 }
 
 export class StatusBarService {
-  private authStatusItem: vscode.StatusBarItem;
   private extensionStatusItem: vscode.StatusBarItem;
   private usageStatusItem: vscode.StatusBarItem;
   private currentStatus: ExtensionStatus = ExtensionStatus.INITIALIZING;
@@ -31,10 +30,6 @@ export class StatusBarService {
     private readonly authService: AuthenticationService,
     private readonly context: vscode.ExtensionContext
   ) {
-    // Auth status (rightmost)
-    this.authStatusItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    this.authStatusItem.command = 'claude-code-continue.showAuthMenu';
-
     // Extension status
     this.extensionStatusItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
@@ -55,21 +50,15 @@ export class StatusBarService {
       sessionStartTime: new Date(),
     });
 
-    this.context.subscriptions.push(
-      this.authStatusItem,
-      this.extensionStatusItem,
-      this.usageStatusItem
-    );
+    this.context.subscriptions.push(this.extensionStatusItem, this.usageStatusItem);
 
     this.initialize();
   }
 
   private async initialize(): Promise<void> {
-    await this.updateAuthStatus();
     this.setExtensionStatus(ExtensionStatus.READY);
     this.updateUsageStatus();
 
-    this.authStatusItem.show();
     this.extensionStatusItem.show();
     this.usageStatusItem.show();
 
@@ -80,9 +69,9 @@ export class StatusBarService {
       })
     );
 
-    // Update auth status periodically
+    // Update usage status periodically
     const updateInterval = setInterval(() => {
-      this.updateAuthStatus();
+      this.updateUsageStatus();
     }, 60000);
 
     this.context.subscriptions.push({
@@ -135,35 +124,6 @@ export class StatusBarService {
     // Save stats
     this.context.globalState.update('continue-cc.usageStats', this.usageStats);
     this.updateUsageStatus();
-  }
-
-  public async updateAuthStatus(): Promise<void> {
-    const isAuthenticated = await this.authService.isAuthenticated();
-
-    if (isAuthenticated) {
-      try {
-        const userInfo = await this.authService.getUserInfo();
-        const displayName = userInfo.email || userInfo.username || 'User';
-
-        this.authStatusItem.text = `$(account) ${displayName}`;
-        this.authStatusItem.backgroundColor = undefined;
-        this.authStatusItem.tooltip = new vscode.MarkdownString(
-          '**Claude Code - Authenticated**\n\n' +
-            `User: ${displayName}\n\n` +
-            'Click to manage your session'
-        );
-      } catch {
-        this.showAuthError();
-      }
-    } else {
-      this.authStatusItem.text = '$(sign-in) Sign In';
-      this.authStatusItem.backgroundColor = new vscode.ThemeColor(
-        'statusBarItem.warningBackground'
-      );
-      this.authStatusItem.tooltip = new vscode.MarkdownString(
-        '**Claude Code - Not Authenticated**\n\n' + 'Click to sign in and start using Claude Code'
-      );
-    }
   }
 
   private updateExtensionStatusBar(): void {
@@ -236,16 +196,6 @@ export class StatusBarService {
         `Accepted: ${this.usageStats.acceptedCompletions}\n` +
         `Acceptance Rate: ${acceptRate}%\n\n` +
         'Click for detailed statistics'
-    );
-  }
-
-  private showAuthError(): void {
-    this.authStatusItem.text = '$(error) Auth Error';
-    this.authStatusItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
-    this.authStatusItem.tooltip = new vscode.MarkdownString(
-      '**Claude Code - Authentication Error**\n\n' +
-        'There was an error checking your authentication status.\n' +
-        'Click to try again.'
     );
   }
 

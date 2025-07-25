@@ -352,6 +352,11 @@
         "category": "Claude Code"
       },
       {
+        "command": "claude-code-continue.showAuthMenu",
+        "title": "Claude Code: Show Auth Menu",
+        "category": "Claude Code"
+      },
+      {
         "command": "continue-cc.showCompletionMetrics",
         "title": "Show Completion Metrics",
         "category": "Claude Code"
@@ -541,7 +546,8 @@
     "dev": "node scripts/dev.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
@@ -556,6 +562,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "@vscode/test-electron": "^2.3.9",
+    "@vscode/vsce": "^3.6.0",
     "chai": "^5.2.1",
     "esbuild": "^0.24.0",
     "eslint": "^9.0.0",

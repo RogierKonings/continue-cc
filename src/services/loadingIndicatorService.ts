@@ -293,7 +293,7 @@ export class ProgressReporter {
           this.progressResolve = resolve;
         });
       }
-    );
+    ) as Promise<void>;
   }
 
   public report(message: string, increment: boolean = true): void {

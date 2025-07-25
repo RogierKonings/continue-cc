@@ -297,7 +297,7 @@ export class OAuthService {
     try {
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        return (await response.json()) as Record<string, unknown>;
       }
       return { error: await response.text() };
     } catch {
@@ -308,7 +308,7 @@ export class OAuthService {
   private getErrorMessage(errorData: Record<string, unknown>, statusCode: number): string {
     if (typeof errorData === 'object') {
       if (errorData.error_description) {
-        return errorData.error_description;
+        return String(errorData.error_description);
       }
       if (errorData.error) {
         switch (errorData.error) {

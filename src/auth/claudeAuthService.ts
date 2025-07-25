@@ -185,10 +185,14 @@ export class ClaudeAuthService extends AuthenticationService {
 
       const data = (await response.json()) as Record<string, unknown>;
       return {
-        id: data.id || '',
-        email: data.email || undefined,
-        username: data.username || undefined,
-        displayName: data.display_name || data.name || undefined,
+        id: String(data.id || ''),
+        email: data.email ? String(data.email) : undefined,
+        username: data.username ? String(data.username) : undefined,
+        displayName: data.display_name
+          ? String(data.display_name)
+          : data.name
+            ? String(data.name)
+            : undefined,
       };
     } catch (error) {
       if (error instanceof AuthenticationError) {

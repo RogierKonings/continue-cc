@@ -5,7 +5,7 @@ export class TokenCounter {
   private static readonly CHARS_PER_TOKEN = 4;
 
   // Model-specific token limits
-  private static readonly TOKEN_LIMITS = {
+  private static readonly TOKEN_LIMITS: Record<string, number> = {
     'claude-3-opus': 200000,
     'claude-3-sonnet': 200000,
     'claude-3-haiku': 200000,

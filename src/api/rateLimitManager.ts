@@ -81,7 +81,16 @@ export class RateLimitManager extends EventEmitter {
   private readonly context: vscode.ExtensionContext;
   private subscription: SubscriptionTier = SubscriptionTier.FREE;
   private limits: RateLimits;
-  private usageData: StoredUsageData;
+  private usageData: StoredUsageData = {
+    minute: { requests: [], tokens: 0 },
+    hour: { requests: [], tokens: 0 },
+    day: { requests: [], tokens: 0 },
+    month: { requests: [], tokens: 0 },
+    lastReset: {
+      day: new Date().toISOString().split('T')[0],
+      month: new Date().toISOString().slice(0, 7),
+    },
+  };
   private requestQueue: QueuedRequest[] = [];
   private isProcessingQueue: boolean = false;
   private statusBarItem: vscode.StatusBarItem;
@@ -372,7 +381,7 @@ export class RateLimitManager extends EventEmitter {
 
     const percentage = dayUsage.percentageUsed;
     let icon = '$(check)';
-    let color: string | undefined;
+    let color: vscode.ThemeColor | undefined;
 
     if (percentage >= 90) {
       icon = '$(alert)';

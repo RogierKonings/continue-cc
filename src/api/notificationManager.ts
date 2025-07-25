@@ -56,7 +56,9 @@ export class NotificationManager extends EventEmitter {
           actions: [
             {
               label: 'Sign In',
-              action: () => vscode.commands.executeCommand('continue-cc.signIn'),
+              action: async () => {
+                await vscode.commands.executeCommand('continue-cc.signIn');
+              },
             },
           ],
         };
@@ -64,14 +66,17 @@ export class NotificationManager extends EventEmitter {
       case ErrorCategory.NETWORK:
         actions.push({
           label: 'Retry',
-          action: () => this.emit('retryRequested', error),
+          action: async () => {
+            this.emit('retryRequested', error);
+          },
         });
 
         if (error.message.includes('proxy')) {
           actions.push({
             label: 'Configure Proxy',
-            action: () =>
-              vscode.commands.executeCommand('workbench.action.openSettings', 'http.proxy'),
+            action: async () => {
+              await vscode.commands.executeCommand('workbench.action.openSettings', 'http.proxy');
+            },
           });
         }
 
@@ -88,11 +93,15 @@ export class NotificationManager extends EventEmitter {
           actions: [
             {
               label: 'View Usage',
-              action: () => vscode.commands.executeCommand('continue-cc.showUsageDetails'),
+              action: async () => {
+                await vscode.commands.executeCommand('continue-cc.showUsageDetails');
+              },
             },
             {
               label: 'Upgrade Plan',
-              action: () => vscode.env.openExternal(vscode.Uri.parse('https://claude.ai/upgrade')),
+              action: async () => {
+                await vscode.env.openExternal(vscode.Uri.parse('https://claude.ai/upgrade'));
+              },
             },
           ],
         };
@@ -104,7 +113,9 @@ export class NotificationManager extends EventEmitter {
           actions: [
             {
               label: 'Check Status',
-              action: () => vscode.env.openExternal(vscode.Uri.parse('https://status.claude.ai')),
+              action: async () => {
+                await vscode.env.openExternal(vscode.Uri.parse('https://status.claude.ai'));
+              },
             },
           ],
         };

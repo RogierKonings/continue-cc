@@ -14,7 +14,9 @@
       "Bash(npx prettier:*)",
       "Bash(npm run lint)",
       "Bash(npm run lint:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "mcp__serena__activate_project",
+      "mcp__filesystem__directory_tree"
     ],
     "deny": []
   }

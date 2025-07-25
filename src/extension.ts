@@ -93,6 +93,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   );
 
+  // Register completion mode switching command
+  const switchCompletionModeCommand = vscode.commands.registerCommand(
+    'continue-cc.switchCompletionMode',
+    async () => {
+      const provider = completionRegistry.getProvider();
+      if (provider && 'getModeManager' in provider) {
+        const modeManager = (provider as any).getModeManager();
+        await modeManager.showModeQuickPick();
+      }
+    }
+  );
+
   // Register sign in command
   const signInCommand = vscode.commands.registerCommand('claude-code-continue.signIn', async () => {
     await authFlowCoordinator.startLoginFlow();
@@ -192,7 +204,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     authStatusBar,
     partialAcceptCommand,
     trackCompletionCommand,
-    trackInlineCompletionCommand
+    trackInlineCompletionCommand,
+    switchCompletionModeCommand
   );
 }
 

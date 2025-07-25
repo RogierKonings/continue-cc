@@ -94,6 +94,32 @@
             "default": true,
             "description": "Enable multi-line inline completions",
             "order": 8
+          },
+          "continue-cc.autocomplete.defaultMode": {
+            "type": "string",
+            "default": "auto",
+            "enum": [
+              "auto",
+              "line",
+              "block",
+              "function",
+              "documentation"
+            ],
+            "enumDescriptions": [
+              "Automatically detect the best completion mode",
+              "Complete single lines of code",
+              "Complete code blocks (if/else, loops, etc.)",
+              "Generate function implementations",
+              "Generate documentation and comments"
+            ],
+            "description": "Default completion mode",
+            "order": 9
+          },
+          "continue-cc.autocomplete.modeIndicatorVisible": {
+            "type": "boolean",
+            "default": true,
+            "description": "Show completion mode indicator in status bar",
+            "order": 10
           }
         }
       },
@@ -371,6 +397,11 @@
         "category": "Claude Code: Completion"
       },
       {
+        "command": "continue-cc.switchCompletionMode",
+        "title": "Switch Completion Mode",
+        "category": "Claude Code: Completion"
+      },
+      {
         "command": "continue-cc.openSettings",
         "title": "Open Settings",
         "category": "Claude Code: Settings"
@@ -486,6 +517,12 @@
         "command": "continue-cc.previousCompletion",
         "key": "alt+[",
         "when": "continue-cc.completionVisible && editorTextFocus"
+      },
+      {
+        "command": "continue-cc.switchCompletionMode",
+        "key": "alt+m",
+        "mac": "cmd+shift+m",
+        "when": "editorTextFocus"
       }
     ]
   },

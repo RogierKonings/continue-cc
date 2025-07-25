@@ -3,6 +3,8 @@ import { ContextExtractor } from '../context/contextExtractor';
 import { DebouncedCompletionManager } from '../performance/debouncedCompletionManager';
 import { CompletionCache } from '../cache/completionCache';
 import { Logger } from '../../utils/logger';
+import { CompletionModeManager } from '../modes/completionModeManager';
+import { MultiLanguageProvider } from '../languages/multiLanguageProvider';
 
 export class ClaudeCompletionProvider
   implements vscode.CompletionItemProvider, vscode.InlineCompletionItemProvider
@@ -11,12 +13,16 @@ export class ClaudeCompletionProvider
   readonly debouncedManager: DebouncedCompletionManager;
   readonly cache: CompletionCache;
   private readonly logger: Logger;
+  private readonly modeManager: CompletionModeManager;
+  private readonly multiLanguageProvider: MultiLanguageProvider;
 
   constructor() {
     this.contextExtractor = new ContextExtractor();
     this.debouncedManager = new DebouncedCompletionManager();
     this.cache = new CompletionCache();
     this.logger = new Logger('ClaudeCompletionProvider');
+    this.modeManager = new CompletionModeManager();
+    this.multiLanguageProvider = new MultiLanguageProvider();
   }
 
   async provideCompletionItems(
@@ -28,6 +34,34 @@ export class ClaudeCompletionProvider
     try {
       const startTime = performance.now();
 
+      // Get language-aware completions first
+      const languageCompletions = await this.multiLanguageProvider.provideCompletions(
+        document,
+        position,
+        context,
+        token
+      );
+
+      // Get mode-specific completions
+      const modeCompletions = await this.modeManager.provideCompletions(
+        document,
+        position,
+        context,
+        token,
+        this.debouncedManager // Pass API client for advanced completions
+      );
+
+      // Combine completions (language completions first, then mode completions)
+      const combinedCompletions = [...languageCompletions, ...modeCompletions];
+
+      // If we have local completions, return them
+      if (combinedCompletions.length > 0) {
+        const latency = performance.now() - startTime;
+        this.logger.info(`Local completion request took ${latency.toFixed(2)}ms`);
+        return combinedCompletions;
+      }
+
+      // Otherwise, fall back to regular Claude completions
       // Extract context
       const codeContext = await this.contextExtractor.extractContext(document, position);
 
@@ -84,8 +118,13 @@ export class ClaudeCompletionProvider
     }
   }
 
+  getModeManager(): CompletionModeManager {
+    return this.modeManager;
+  }
+
   dispose(): void {
     this.debouncedManager.dispose();
     this.cache.clear();
+    this.modeManager.dispose();
   }
 }

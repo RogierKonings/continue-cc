@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { SymbolInfo } from './symbolIndexer';
+import type { SymbolInfo } from './symbolIndexer';
 import { Logger } from '../../utils/logger';
 
 export interface ContextScore {

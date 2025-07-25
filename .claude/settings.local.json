@@ -17,7 +17,8 @@
       "Bash(npm run test:*)",
       "mcp__serena__activate_project",
       "mcp__filesystem__directory_tree",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm test)"
     ],
     "deny": []
   }

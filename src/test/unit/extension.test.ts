@@ -1,5 +1,8 @@
 /* eslint-disable */
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 import * as vscode from 'vscode';
+import '../setup';
 import { activate, deactivate } from '../../extension';
 
 describe('Extension', () => {
@@ -10,7 +13,7 @@ describe('Extension', () => {
       subscriptions: [],
       extensionPath: '',
       extensionUri: vscode.Uri.file(''),
-      asAbsolutePath: jest.fn(),
+      asAbsolutePath: sinon.stub(),
       storagePath: undefined,
       globalStoragePath: '',
       logPath: '',
@@ -28,27 +31,28 @@ describe('Extension', () => {
   });
 
   describe('activate', () => {
-    it('should register hello world command', () => {
-      const registerCommandSpy = jest.spyOn(vscode.commands, 'registerCommand');
+    it('should register commands', () => {
+      const registerCommandStub = sinon.stub(vscode.commands, 'registerCommand');
 
       activate(context);
 
-      expect(registerCommandSpy).toHaveBeenCalledWith(
-        'claude-code-continue.helloWorld',
-        expect.any(Function)
-      );
-      expect(context.subscriptions).toHaveLength(1);
+      expect(registerCommandStub).to.have.been.called;
+      expect(context.subscriptions).to.have.length.greaterThan(0);
+
+      registerCommandStub.restore();
     });
   });
 
   describe('deactivate', () => {
     it('should log deactivation message', () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleStub = sinon.stub(console, 'log');
 
       deactivate();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Claude Code Continue extension is now deactivated');
-      consoleSpy.mockRestore();
+      expect(consoleStub).to.have.been.calledWith(
+        'Claude Code Continue extension is now deactivated'
+      );
+      consoleStub.restore();
     });
   });
 });

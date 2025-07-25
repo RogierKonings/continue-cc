@@ -1,10 +1,11 @@
 import * as path from 'path';
 import Mocha from 'mocha';
 import { glob } from 'glob';
+import '../setup';
 
 export function run(): Promise<void> {
   const mocha = new Mocha({
-    ui: 'tdd',
+    ui: 'bdd',
     color: true,
   });
 

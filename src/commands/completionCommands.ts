@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CompletionProviderRegistry } from '../autocomplete/completionProviderRegistry';
+import type { CompletionProviderRegistry } from '../autocomplete/completionProviderRegistry';
 
 export class CompletionCommands {
   private isEnabled = true;

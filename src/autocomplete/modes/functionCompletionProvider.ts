@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { CompletionMode, ModeConfiguration, MODE_CONFIGURATIONS } from './completionModes';
+import type { ModeConfiguration } from './completionModes';
+import { CompletionMode, MODE_CONFIGURATIONS } from './completionModes';
 
 export class FunctionCompletionProvider {
   private readonly config: ModeConfiguration;

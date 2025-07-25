@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { CompletionMode, ModeConfiguration } from './completionModes';
+import type { ModeConfiguration } from './completionModes';
+import { CompletionMode } from './completionModes';
 import { ModeDetector } from './modeDetector';
 import { LineCompletionProvider } from './lineCompletionProvider';
 import { BlockCompletionProvider } from './blockCompletionProvider';

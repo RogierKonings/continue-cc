@@ -1,11 +1,14 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { SymbolIndexer, SymbolInfo } from './symbolIndexer';
-import { ImportResolver, ImportInfo } from './importResolver';
-import { ContextRanker, ContextScore } from './contextRanker';
+import type { SymbolInfo } from './symbolIndexer';
+import { SymbolIndexer } from './symbolIndexer';
+import type { ImportInfo } from './importResolver';
+import { ImportResolver } from './importResolver';
+import type { ContextScore } from './contextRanker';
+import { ContextRanker } from './contextRanker';
 import { Logger } from '../../utils/logger';
-import { CodeContext } from './contextExtractor';
+import type { CodeContext } from './contextExtractor';
 
 export interface SmartContext {
   symbols: SymbolInfo[];

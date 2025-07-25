@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type * as vscode from 'vscode';
 import type { CompletionRequest, CompletionResponse } from './types';
 import { Logger } from '../utils/logger';
 import * as crypto from 'crypto';

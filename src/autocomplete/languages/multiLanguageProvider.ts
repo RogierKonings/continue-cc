@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
-import { LanguageDetector, LanguageInfo } from './languageDetector';
+import type { LanguageInfo } from './languageDetector';
+import { LanguageDetector } from './languageDetector';
 import { LanguagePromptTemplate } from './languagePromptTemplate';
 import { SyntaxAwareProvider } from './syntaxAwareProvider';
-import { FrameworkDetector, FrameworkInfo } from './frameworkDetector';
+import type { FrameworkInfo } from './frameworkDetector';
+import { FrameworkDetector } from './frameworkDetector';
 import { CompletionMode } from '../modes/completionModes';
 import { ModeDetector } from '../modes/modeDetector';
 

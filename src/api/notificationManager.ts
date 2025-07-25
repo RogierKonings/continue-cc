@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { EventEmitter } from 'events';
-import { APIError, ErrorCategory } from './errors';
+import type { APIError } from './errors';
+import { ErrorCategory } from './errors';
 import { Logger } from '../utils/logger';
 
 interface NotificationAction {
@@ -280,17 +281,17 @@ export class NotificationManager extends EventEmitter {
 
   private async showErrorDetails(error: APIError): Promise<void> {
     const content = [
-      `# API Error Details`,
+      '# API Error Details',
       '',
       `**Code:** ${error.code}`,
       `**Category:** ${error.category}`,
       `**Time:** ${new Date(error.timestamp).toLocaleString()}`,
       `**Request ID:** ${error.requestContext?.requestId || 'N/A'}`,
       '',
-      `## Message`,
+      '## Message',
       error.message,
       '',
-      `## User Message`,
+      '## User Message',
       error.userMessage,
       '',
     ];

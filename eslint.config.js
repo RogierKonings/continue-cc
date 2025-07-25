@@ -45,7 +45,12 @@ module.exports = [
         afterEach: 'readonly',
         jest: 'readonly',
         expect: 'readonly',
-        test: 'readonly'
+        test: 'readonly',
+        ReadableStream: 'readonly',
+        TextDecoder: 'readonly',
+        performance: 'readonly',
+        AbortSignal: 'readonly',
+        Thenable: 'readonly'
       }
     },
     plugins: {

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
+import '../../setup';
 import { RateLimitManager, RequestPriority } from '../../../api/rateLimitManager';
 import { SubscriptionTier, UserInfo } from '../../../api/types';
 
@@ -56,7 +57,7 @@ describe('RateLimitManager', () => {
     });
 
     it('should show status bar item', () => {
-      expect(statusBarItem.show).to.have.been.called;
+      expect(statusBarItem.show as sinon.SinonStub).to.have.been.called;
       expect(statusBarItem.text).to.include('0%');
     });
   });
@@ -192,7 +193,7 @@ describe('RateLimitManager', () => {
         await promise;
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error.message).to.include('timeout');
+        expect((error as Error).message).to.include('timeout');
       }
     });
   });
@@ -279,7 +280,7 @@ describe('RateLimitManager', () => {
         await promise;
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error.message).to.include('Queue cleared');
+        expect((error as Error).message).to.include('Queue cleared');
       }
     });
   });

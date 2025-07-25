@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { CompletionMode, ModeConfiguration, MODE_CONFIGURATIONS } from './completionModes';
+import type { ModeConfiguration } from './completionModes';
+import { CompletionMode, MODE_CONFIGURATIONS } from './completionModes';
 
 export class BlockCompletionProvider {
   private readonly config: ModeConfiguration;
@@ -84,7 +85,7 @@ export class BlockCompletionProvider {
       vscode.CompletionItemKind.Snippet
     );
     ifElseItem.insertText = new vscode.SnippetString(
-      `\${1:// condition logic}\n` +
+      '${1:// condition logic}\n' +
         `${indent}} else {\n` +
         `${indent}  \${2:// else logic}\n` +
         `${indent}}`
@@ -114,7 +115,7 @@ export class BlockCompletionProvider {
       vscode.CompletionItemKind.Snippet
     );
     forIndexItem.insertText = new vscode.SnippetString(
-      `let i = 0; i < \${1:array}.length; i++) {\n` +
+      'let i = 0; i < ${1:array}.length; i++) {\n' +
         `${indent}  \${2:// loop body}\n` +
         `${indent}}`
     );
@@ -124,7 +125,7 @@ export class BlockCompletionProvider {
     // For...of loop
     const forOfItem = new vscode.CompletionItem('for...of loop', vscode.CompletionItemKind.Snippet);
     forOfItem.insertText = new vscode.SnippetString(
-      `const \${1:item} of \${2:array}) {\n` + `${indent}  \${3:// loop body}\n` + `${indent}}`
+      'const ${1:item} of ${2:array}) {\n' + `${indent}  \${3:// loop body}\n` + `${indent}}`
     );
     forOfItem.detail = 'For...of loop';
     completions.push(forOfItem);
@@ -154,7 +155,7 @@ export class BlockCompletionProvider {
       vscode.CompletionItemKind.Snippet
     );
     tryCatchItem.insertText = new vscode.SnippetString(
-      `\${1:// code that might throw}\n` +
+      '${1:// code that might throw}\n' +
         `${indent}} catch (error) {\n` +
         `${indent}  \${2:console.error(error)}\n` +
         `${indent}}`
@@ -168,7 +169,7 @@ export class BlockCompletionProvider {
       vscode.CompletionItemKind.Snippet
     );
     tryCatchFinallyItem.insertText = new vscode.SnippetString(
-      `\${1:// code that might throw}\n` +
+      '${1:// code that might throw}\n' +
         `${indent}} catch (error) {\n` +
         `${indent}  \${2:console.error(error)}\n` +
         `${indent}} finally {\n` +
@@ -191,7 +192,7 @@ export class BlockCompletionProvider {
     // Switch case template
     const switchItem = new vscode.CompletionItem('switch cases', vscode.CompletionItemKind.Snippet);
     switchItem.insertText = new vscode.SnippetString(
-      `case \${1:value1}:\n` +
+      'case ${1:value1}:\n' +
         `${indent}  \${2:// code}\n` +
         `${indent}  break\n` +
         `${indent}case \${3:value2}:\n` +

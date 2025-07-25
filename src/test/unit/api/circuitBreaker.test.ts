@@ -87,7 +87,7 @@ describe('CircuitBreaker', () => {
         await circuitBreaker.execute(async () => 'success');
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error.message).to.include('Circuit breaker is OPEN');
+        expect((error as Error).message).to.include('Circuit breaker is OPEN');
       }
     });
   });

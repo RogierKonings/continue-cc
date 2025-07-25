@@ -1,4 +1,5 @@
-import { CompletionMode, ModeDetectionContext } from './completionModes';
+import type { ModeDetectionContext } from './completionModes';
+import { CompletionMode } from './completionModes';
 
 export class ModeDetector {
   private static readonly LINE_TRIGGERS = [

@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import axios, { AxiosInstance } from 'axios';
+import '../../setup';
 import { ClaudeCodeAPIClient } from '../../../api/claudeCodeAPIClient';
 import { TokenManager } from '../../../auth/tokenManager';
 import {
@@ -60,8 +61,8 @@ describe('ClaudeCodeAPIClient', () => {
     });
 
     it('should setup request and response interceptors', () => {
-      expect(axiosStub.interceptors.request.use).to.have.been.called;
-      expect(axiosStub.interceptors.response.use).to.have.been.called;
+      expect(axiosStub.interceptors.request.use as sinon.SinonStub).to.have.been.called;
+      expect(axiosStub.interceptors.response.use as sinon.SinonStub).to.have.been.called;
     });
   });
 
@@ -90,7 +91,7 @@ describe('ClaudeCodeAPIClient', () => {
 
       const result = await apiClient.getCompletion(mockRequest);
 
-      expect(axiosStub.post).to.have.been.calledWith('/v1/completion', {
+      expect(axiosStub.post as sinon.SinonStub).to.have.been.calledWith('/v1/completion', {
         prompt: 'test prompt',
         context: 'test context',
         language: 'typescript',
@@ -110,7 +111,7 @@ describe('ClaudeCodeAPIClient', () => {
         await apiClient.getCompletion(mockRequest);
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error.message).to.include('No network connection');
+        expect((error as Error).message).to.include('No network connection');
       }
     });
   });
@@ -134,7 +135,7 @@ describe('ClaudeCodeAPIClient', () => {
 
       const result = await apiClient.validateToken();
 
-      expect(axiosStub.get).to.have.been.calledWith('/v1/auth/validate');
+      expect(axiosStub.get as sinon.SinonStub).to.have.been.calledWith('/v1/auth/validate');
       expect(result).to.deep.equal(mockValidation);
     });
   });
@@ -155,7 +156,7 @@ describe('ClaudeCodeAPIClient', () => {
 
       const result = await apiClient.getUserInfo();
 
-      expect(axiosStub.get).to.have.been.calledWith('/v1/user/info');
+      expect(axiosStub.get as sinon.SinonStub).to.have.been.calledWith('/v1/user/info');
       expect(result).to.deep.equal(mockUserInfo);
     });
   });
@@ -173,7 +174,7 @@ describe('ClaudeCodeAPIClient', () => {
 
       const result = await apiClient.getUsageStats('month');
 
-      expect(axiosStub.get).to.have.been.calledWith('/v1/user/usage', {
+      expect(axiosStub.get as sinon.SinonStub).to.have.been.calledWith('/v1/user/usage', {
         params: { period: 'month' },
       });
       expect(result).to.deep.equal(mockUsageStats);
@@ -202,7 +203,7 @@ describe('ClaudeCodeAPIClient', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect(error).to.be.instanceOf(AuthenticationError);
-        expect(mockTokenManager.clearToken).to.have.been.called;
+        expect(mockTokenManager.clearToken as sinon.SinonStub).to.have.been.called;
         expect(emittedError).to.exist;
       }
     });
@@ -237,7 +238,8 @@ describe('ClaudeCodeAPIClient', () => {
 
   describe('Request tracking', () => {
     it('should generate unique request IDs', async () => {
-      const requestInterceptor = axiosStub.interceptors.request.use.getCall(0).args[0];
+      const requestInterceptor = (axiosStub.interceptors.request.use as sinon.SinonStub).getCall(0)
+        .args[0];
 
       const config1 = await requestInterceptor({ headers: {} });
       const config2 = await requestInterceptor({ headers: {} });
@@ -248,18 +250,21 @@ describe('ClaudeCodeAPIClient', () => {
     });
 
     it('should add authorization header', async () => {
-      const requestInterceptor = axiosStub.interceptors.request.use.getCall(0).args[0];
+      const requestInterceptor = (axiosStub.interceptors.request.use as sinon.SinonStub).getCall(0)
+        .args[0];
 
       const config = await requestInterceptor({ headers: {} });
 
       expect(config.headers.Authorization).to.equal('Bearer test-token');
-      expect(mockTokenManager.getValidToken).to.have.been.called;
+      expect(mockTokenManager.getValidToken as sinon.SinonStub).to.have.been.called;
     });
   });
 
   describe('Rate limit handling', () => {
     it('should emit rate limit info from headers', async () => {
-      const responseInterceptor = axiosStub.interceptors.response.use.getCall(0).args[0];
+      const responseInterceptor = (axiosStub.interceptors.response.use as sinon.SinonStub).getCall(
+        0
+      ).args[0];
 
       let emittedInfo: any;
       apiClient.on('rateLimitInfo', (info) => {
@@ -288,7 +293,9 @@ describe('ClaudeCodeAPIClient', () => {
 
   describe('Deprecation warnings', () => {
     it('should emit deprecation warnings', async () => {
-      const responseInterceptor = axiosStub.interceptors.response.use.getCall(0).args[0];
+      const responseInterceptor = (axiosStub.interceptors.response.use as sinon.SinonStub).getCall(
+        0
+      ).args[0];
 
       let emittedWarning: any;
       apiClient.on('deprecationWarning', (warning) => {

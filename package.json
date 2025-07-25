@@ -20,66 +20,300 @@
         "label": "Claude Code"
       }
     ],
-    "configuration": {
-      "title": "Claude Code Continue",
-      "properties": {
-        "claude-code.clientId": {
-          "type": "string",
-          "default": "",
-          "description": "OAuth Client ID for Claude Code authentication"
-        },
-        "continue-cc.autocomplete.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable AI-powered code completions"
-        },
-        "continue-cc.autocomplete.automaticTrigger": {
-          "type": "boolean",
-          "default": true,
-          "description": "Automatically trigger completions while typing"
-        },
-        "continue-cc.autocomplete.minimumCharacters": {
-          "type": "number",
-          "default": 2,
-          "description": "Minimum number of characters before triggering completions"
-        },
-        "continue-cc.autocomplete.completionDelay": {
-          "type": "number",
-          "default": 200,
-          "description": "Delay in milliseconds before requesting completions"
-        },
-        "continue-cc.autocomplete.disableInComments": {
-          "type": "boolean",
-          "default": false,
-          "description": "Disable completions inside comments"
-        },
-        "continue-cc.autocomplete.disableInStrings": {
-          "type": "boolean",
-          "default": false,
-          "description": "Disable completions inside strings"
-        },
-        "continue-cc.autocomplete.maxCompletions": {
-          "type": "number",
-          "default": 20,
-          "description": "Maximum number of completions to show"
-        },
-        "continue-cc.autocomplete.enableInlineCompletions": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable multi-line inline completions"
-        },
-        "continue-cc.autocomplete.enableCaching": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable caching of completion results"
-        },
-        "continue-cc.autocomplete.cacheTTL": {
-          "type": "number",
-          "default": 300000,
-          "description": "Cache time-to-live in milliseconds (default: 5 minutes)"
+    "configuration": [
+      {
+        "title": "General",
+        "properties": {
+          "continue-cc.enable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable Claude Code Continue extension",
+            "order": 1
+          },
+          "claude-code.clientId": {
+            "type": "string",
+            "default": "",
+            "description": "OAuth Client ID for Claude Code authentication",
+            "order": 2
+          }
+        }
+      },
+      {
+        "title": "Autocomplete",
+        "properties": {
+          "continue-cc.autocomplete.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable AI-powered code completions",
+            "order": 1
+          },
+          "continue-cc.autocomplete.automaticTrigger": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically trigger completions while typing",
+            "order": 2
+          },
+          "continue-cc.autocomplete.completionDelay": {
+            "type": "number",
+            "default": 150,
+            "minimum": 0,
+            "maximum": 1000,
+            "description": "Delay in milliseconds before requesting completions",
+            "order": 3
+          },
+          "continue-cc.autocomplete.minimumCharacters": {
+            "type": "number",
+            "default": 2,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Minimum number of characters before triggering completions",
+            "order": 4
+          },
+          "continue-cc.autocomplete.maxCompletions": {
+            "type": "number",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Maximum number of completions to show",
+            "order": 5
+          },
+          "continue-cc.autocomplete.disableInComments": {
+            "type": "boolean",
+            "default": false,
+            "description": "Disable completions inside comments",
+            "order": 6
+          },
+          "continue-cc.autocomplete.disableInStrings": {
+            "type": "boolean",
+            "default": false,
+            "description": "Disable completions inside strings",
+            "order": 7
+          },
+          "continue-cc.autocomplete.enableInlineCompletions": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable multi-line inline completions",
+            "order": 8
+          }
+        }
+      },
+      {
+        "title": "Language-specific Settings",
+        "properties": {
+          "continue-cc.languages.javascript": {
+            "type": "object",
+            "default": {
+              "enable": true,
+              "triggerCharacters": [
+                ".",
+                "(",
+                "{",
+                "[",
+                "'",
+                "\"",
+                "`",
+                "/"
+              ]
+            },
+            "description": "JavaScript-specific completion settings",
+            "properties": {
+              "enable": {
+                "type": "boolean",
+                "description": "Enable completions for JavaScript"
+              },
+              "triggerCharacters": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Characters that trigger completions"
+              }
+            }
+          },
+          "continue-cc.languages.typescript": {
+            "type": "object",
+            "default": {
+              "enable": true,
+              "triggerCharacters": [
+                ".",
+                "(",
+                "{",
+                "[",
+                "<",
+                "'",
+                "\"",
+                "`",
+                "/"
+              ]
+            },
+            "description": "TypeScript-specific completion settings",
+            "properties": {
+              "enable": {
+                "type": "boolean",
+                "description": "Enable completions for TypeScript"
+              },
+              "triggerCharacters": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Characters that trigger completions"
+              }
+            }
+          },
+          "continue-cc.languages.python": {
+            "type": "object",
+            "default": {
+              "enable": true,
+              "triggerCharacters": [
+                ".",
+                "(",
+                "[",
+                "'",
+                "\"",
+                " "
+              ]
+            },
+            "description": "Python-specific completion settings",
+            "properties": {
+              "enable": {
+                "type": "boolean",
+                "description": "Enable completions for Python"
+              },
+              "triggerCharacters": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Characters that trigger completions"
+              }
+            }
+          }
+        }
+      },
+      {
+        "title": "Performance",
+        "properties": {
+          "continue-cc.performance.enableCaching": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable caching of completion results",
+            "order": 1
+          },
+          "continue-cc.performance.cacheTTL": {
+            "type": "number",
+            "default": 300000,
+            "minimum": 60000,
+            "maximum": 3600000,
+            "description": "Cache time-to-live in milliseconds (1-60 minutes)",
+            "order": 2
+          },
+          "continue-cc.performance.maxConcurrentRequests": {
+            "type": "number",
+            "default": 3,
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Maximum concurrent API requests",
+            "order": 3
+          }
+        }
+      },
+      {
+        "title": "Advanced",
+        "properties": {
+          "continue-cc.advanced.contextWindow": {
+            "type": "number",
+            "default": 4000,
+            "minimum": 1000,
+            "maximum": 8000,
+            "description": "Maximum context window size in tokens",
+            "order": 1
+          },
+          "continue-cc.advanced.temperature": {
+            "type": "number",
+            "default": 0.2,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Model temperature for completions (0-1)",
+            "order": 2
+          },
+          "continue-cc.advanced.completionTriggerPatterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Custom regex patterns that trigger completions",
+            "order": 3
+          },
+          "continue-cc.advanced.ignoredFilePatterns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "**/node_modules/**",
+              "**/dist/**",
+              "**/build/**"
+            ],
+            "description": "File patterns to ignore for completions",
+            "order": 4
+          },
+          "continue-cc.advanced.apiEndpoint": {
+            "type": "string",
+            "default": "",
+            "description": "Custom API endpoint (leave empty for default)",
+            "order": 5
+          }
+        }
+      },
+      {
+        "title": "Privacy & Telemetry",
+        "properties": {
+          "continue-cc.telemetry.enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Send anonymous usage statistics",
+            "order": 1
+          },
+          "continue-cc.telemetry.shareCodeContext": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include anonymized code context in telemetry",
+            "order": 2
+          },
+          "continue-cc.privacy.maskSensitiveData": {
+            "type": "boolean",
+            "default": true,
+            "description": "Mask potentially sensitive data in completions",
+            "order": 3
+          }
+        }
+      },
+      {
+        "title": "Experimental",
+        "properties": {
+          "continue-cc.experimental.enableBetaFeatures": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable experimental beta features",
+            "order": 1
+          },
+          "continue-cc.experimental.enableSemanticCompletion": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use semantic analysis for better completions",
+            "order": 2
+          },
+          "continue-cc.experimental.enableMultiFileContext": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include context from multiple files",
+            "order": 3
+          }
         }
       }
-    },
+    ],
     "commands": [
       {
         "command": "claude-code-continue.signIn",
@@ -105,14 +339,153 @@
         "command": "continue-cc.acceptPartialCompletion",
         "title": "Accept Partial Completion",
         "category": "Claude Code"
+      },
+      {
+        "command": "continue-cc.acceptCompletion",
+        "title": "Accept Completion",
+        "category": "Claude Code: Completion"
+      },
+      {
+        "command": "continue-cc.dismissCompletion",
+        "title": "Dismiss Completion",
+        "category": "Claude Code: Completion"
+      },
+      {
+        "command": "continue-cc.triggerCompletion",
+        "title": "Trigger Completion",
+        "category": "Claude Code: Completion"
+      },
+      {
+        "command": "continue-cc.toggle",
+        "title": "Toggle Claude Code",
+        "category": "Claude Code: General"
+      },
+      {
+        "command": "continue-cc.nextCompletion",
+        "title": "Next Completion",
+        "category": "Claude Code: Completion"
+      },
+      {
+        "command": "continue-cc.previousCompletion",
+        "title": "Previous Completion",
+        "category": "Claude Code: Completion"
+      },
+      {
+        "command": "continue-cc.openSettings",
+        "title": "Open Settings",
+        "category": "Claude Code: Settings"
+      },
+      {
+        "command": "continue-cc.showUsageStatistics",
+        "title": "Show Usage Statistics",
+        "category": "Claude Code: General"
+      },
+      {
+        "command": "continue-cc.showDebugInfo",
+        "title": "Show Debug Information",
+        "category": "Claude Code: Debug"
+      },
+      {
+        "command": "continue-cc.resetKeybindings",
+        "title": "Reset Keybindings to Default",
+        "category": "Claude Code: Settings"
+      },
+      {
+        "command": "continue-cc.exportSettings",
+        "title": "Export Settings",
+        "category": "Claude Code: Settings"
+      },
+      {
+        "command": "continue-cc.importSettings",
+        "title": "Import Settings",
+        "category": "Claude Code: Settings"
+      },
+      {
+        "command": "continue-cc.analyzeFile",
+        "title": "Analyze File with Claude Code",
+        "category": "Claude Code: General"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "continue-cc.triggerCompletion",
+          "when": "editorTextFocus && !editorReadonly",
+          "group": "claude-code@1"
+        },
+        {
+          "command": "continue-cc.toggle",
+          "when": "editorTextFocus",
+          "group": "claude-code@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "continue-cc.analyzeFile",
+          "when": "resourceExtname =~ /\\.(js|ts|jsx|tsx|py|java|cpp|c|cs|go|rb|php|swift)$/",
+          "group": "claude-code"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "continue-cc.acceptCompletion",
+          "when": "false"
+        },
+        {
+          "command": "continue-cc.dismissCompletion",
+          "when": "false"
+        },
+        {
+          "command": "continue-cc.nextCompletion",
+          "when": "false"
+        },
+        {
+          "command": "continue-cc.previousCompletion",
+          "when": "false"
+        },
+        {
+          "command": "continue-cc.acceptPartialCompletion",
+          "when": "false"
+        }
+      ]
+    },
     "keybindings": [
+      {
+        "command": "continue-cc.acceptCompletion",
+        "key": "tab",
+        "when": "continue-cc.completionVisible && editorTextFocus && !editorTabMovesFocus && !suggestWidgetVisible"
+      },
+      {
+        "command": "continue-cc.dismissCompletion",
+        "key": "escape",
+        "when": "continue-cc.completionVisible && editorTextFocus"
+      },
+      {
+        "command": "continue-cc.triggerCompletion",
+        "key": "ctrl+space",
+        "mac": "cmd+space",
+        "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "continue-cc.toggle",
+        "key": "alt+\\",
+        "when": "editorTextFocus"
+      },
       {
         "command": "continue-cc.acceptPartialCompletion",
         "key": "ctrl+right",
         "mac": "cmd+right",
-        "when": "editorTextFocus && suggestWidgetVisible"
+        "when": "continue-cc.completionVisible && editorTextFocus"
+      },
+      {
+        "command": "continue-cc.nextCompletion",
+        "key": "alt+]",
+        "when": "continue-cc.completionVisible && editorTextFocus"
+      },
+      {
+        "command": "continue-cc.previousCompletion",
+        "key": "alt+[",
+        "when": "continue-cc.completionVisible && editorTextFocus"
       }
     ]
   },

@@ -1,56 +1,64 @@
 # User Story: Settings and Configuration UI
 
 ## Story Description
+
 As a user, I want to customize the extension's behavior through an intuitive settings interface so that I can tailor the autocomplete experience to my preferences and workflow.
 
 ## Action Items
 
 ### 1. Create Settings Schema
-- [ ] Define configuration schema in package.json
-- [ ] Add settings for completion behavior
-- [ ] Include language-specific settings
-- [ ] Create workspace vs user settings
-- [ ] Add experimental feature flags
+
+- [x] Define configuration schema in package.json
+- [x] Add settings for completion behavior
+- [x] Include language-specific settings
+- [x] Create workspace vs user settings
+- [x] Add experimental feature flags
 
 ### 2. Build Settings UI Components
-- [ ] Create settings webview page
-- [ ] Design intuitive categorized layout
-- [ ] Add search functionality for settings
-- [ ] Implement real-time preview
-- [ ] Create reset to defaults option
+
+- [x] Create settings webview page
+- [x] Design intuitive categorized layout
+- [x] Add search functionality for settings
+- [x] Implement real-time preview
+- [x] Create reset to defaults option
 
 ### 3. Implement Setting Categories
-- [ ] General settings (enable/disable, delays)
-- [ ] Language-specific configurations
-- [ ] Keybinding customizations
-- [ ] Performance tuning options
-- [ ] Privacy and telemetry settings
+
+- [x] General settings (enable/disable, delays)
+- [x] Language-specific configurations
+- [x] Keybinding customizations
+- [x] Performance tuning options
+- [x] Privacy and telemetry settings
 
 ### 4. Add Advanced Configurations
-- [ ] Context window size limits
-- [ ] Completion trigger patterns
-- [ ] Ignored file patterns
-- [ ] Custom prompt templates
-- [ ] API endpoint overrides
+
+- [x] Context window size limits
+- [x] Completion trigger patterns
+- [x] Ignored file patterns
+- [x] Custom prompt templates
+- [x] API endpoint overrides
 
 ### 5. Create Settings Migration
-- [ ] Handle settings version upgrades
-- [ ] Migrate deprecated settings
-- [ ] Validate settings on load
-- [ ] Import/export settings
-- [ ] Cloud sync preparation
+
+- [x] Handle settings version upgrades
+- [x] Migrate deprecated settings
+- [x] Validate settings on load
+- [x] Import/export settings
+- [x] Cloud sync preparation
 
 ## Acceptance Criteria
-- [ ] All settings accessible via UI and settings.json
-- [ ] Changes take effect immediately
-- [ ] Settings persist across sessions
-- [ ] Validation prevents invalid values
-- [ ] Help text explains each setting
-- [ ] Search finds settings quickly
+
+- [x] All settings accessible via UI and settings.json
+- [x] Changes take effect immediately
+- [x] Settings persist across sessions
+- [x] Validation prevents invalid values
+- [x] Help text explains each setting
+- [x] Search finds settings quickly
 
 ## Test Cases
 
 ### Settings UI Tests
+
 1. **Open Settings**: Command opens settings view
 2. **Category Navigation**: All categories accessible
 3. **Search Function**: Finds settings by keyword
@@ -58,6 +66,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 5. **Reset Defaults**: Restores original values
 
 ### Configuration Tests
+
 1. **Toggle Settings**: Enable/disable works
 2. **Number Inputs**: Validates min/max values
 3. **String Settings**: Accepts valid patterns
@@ -65,6 +74,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 5. **Multi-select**: Multiple options work
 
 ### Persistence Tests
+
 1. **Save Settings**: Persists to settings.json
 2. **Load Settings**: Restores on restart
 3. **Workspace Override**: Workspace > User
@@ -72,6 +82,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 5. **Export/Import**: Settings portable
 
 ### Validation Tests
+
 1. **Invalid Values**: Shows error message
 2. **Type Checking**: Correct types enforced
 3. **Range Limits**: Min/max respected
@@ -79,6 +90,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 5. **Dependencies**: Conditional settings
 
 ### Integration Tests
+
 1. **Immediate Effect**: No restart required
 2. **Language Specific**: Per-language works
 3. **Keybinding**: Custom keys work
@@ -86,6 +98,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 5. **Telemetry**: Opt-out respected
 
 ## Edge Cases
+
 - Corrupted settings.json file
 - Settings sync conflicts
 - Invalid JSON in manual edit
@@ -95,6 +108,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 - Unicode in string settings
 
 ## Technical Notes
+
 - Use vscode.workspace.getConfiguration()
 - Implement ConfigurationChangeEvent listener
 - Use contribution points for settings
@@ -102,10 +116,12 @@ As a user, I want to customize the extension's behavior through an intuitive set
 - Add telemetry for popular settings
 
 ## Dependencies
+
 - Depends on: Core functionality complete
 - Blocks: User customization features
 
 ## Settings Structure Example
+
 ```json
 {
   "claudeCode.enable": true,
@@ -124,6 +140,7 @@ As a user, I want to customize the extension's behavior through an intuitive set
 ```
 
 ## UI Components
+
 - Toggle switches for boolean
 - Number inputs with steppers
 - Dropdowns for enums
@@ -132,5 +149,6 @@ As a user, I want to customize the extension's behavior through an intuitive set
 - Collapsible sections
 
 ## Estimated Effort
+
 - 8-10 hours for settings infrastructure
 - 12-14 hours including full UI and migration

@@ -3,23 +3,72 @@ import { AuthFlowCoordinator } from './auth/authFlowCoordinator';
 import { ClaudeAuthService } from './auth/claudeAuthService';
 import { AuthStatusBar } from './views/authStatusBar';
 import { CompletionProviderRegistry } from './autocomplete/completionProviderRegistry';
+import { CompletionCommands } from './commands/completionCommands';
+import { SettingsCommands } from './commands/settingsCommands';
+import { GeneralCommands } from './commands/generalCommands';
+import { registerQuickActions } from './providers/quickActionsProvider';
+import { SettingsMigrationService } from './services/settingsMigration';
+import { StatusBarService } from './services/statusBarService';
+import { LoadingIndicatorService } from './services/loadingIndicatorService';
+import { NotificationService } from './services/notificationService';
 
 let authService: ClaudeAuthService;
 let authFlowCoordinator: AuthFlowCoordinator;
 let authStatusBar: AuthStatusBar;
+let statusBarService: StatusBarService;
+let loadingIndicatorService: LoadingIndicatorService;
+let notificationService: NotificationService;
 let completionRegistry: CompletionProviderRegistry;
+let completionCommands: CompletionCommands;
+let settingsCommands: SettingsCommands;
+let generalCommands: GeneralCommands;
 
-export function activate(context: vscode.ExtensionContext): void {
+// Export services for use in other modules
+export function getNotificationService(): NotificationService {
+  return notificationService;
+}
+
+export function getStatusBarService(): StatusBarService {
+  return statusBarService;
+}
+
+export function getLoadingIndicatorService(): LoadingIndicatorService {
+  return loadingIndicatorService;
+}
+
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   console.log('Claude Code Continue extension is now active!');
+
+  // Run settings migration first
+  const migrationService = new SettingsMigrationService(context);
+  await migrationService.runMigrations();
+  await migrationService.validateSettings();
 
   // Initialize authentication services
   authService = new ClaudeAuthService(context);
   authFlowCoordinator = new AuthFlowCoordinator(authService, context);
   authStatusBar = new AuthStatusBar(authService, context);
 
+  // Initialize enhanced status bar service
+  statusBarService = new StatusBarService(authService, context);
+
+  // Initialize loading indicator service
+  loadingIndicatorService = new LoadingIndicatorService(context, statusBarService);
+
+  // Initialize notification service
+  notificationService = new NotificationService(context);
+
   // Initialize autocomplete services
   completionRegistry = new CompletionProviderRegistry();
   completionRegistry.register(context);
+
+  // Initialize command handlers
+  completionCommands = new CompletionCommands(context, completionRegistry);
+  settingsCommands = new SettingsCommands(context);
+  generalCommands = new GeneralCommands(context);
+
+  // Register quick actions and code action providers
+  registerQuickActions(context);
 
   // Register partial accept command for inline completions
   const partialAcceptCommand = vscode.commands.registerCommand(
@@ -153,5 +202,19 @@ export function deactivate(): void {
   // Clean up autocomplete resources
   if (completionRegistry) {
     completionRegistry.dispose();
+  }
+
+  // Clean up command resources
+  if (generalCommands) {
+    generalCommands.dispose();
+  }
+
+  // Clean up services
+  if (statusBarService) {
+    statusBarService.dispose();
+  }
+
+  if (loadingIndicatorService) {
+    loadingIndicatorService.dispose();
   }
 }
